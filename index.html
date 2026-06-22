@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YusaCoder Market — Yakında Açılıyor</title>
+  <meta name="description" content="YusaCoder Market yakında açılıyor. Dijital ürünler, temalar ve özel içerikler için hazırlanıyor." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #060606;
+      --panel: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.10);
+      --text: rgba(255,255,255,0.95);
+      --muted: rgba(255,255,255,0.72);
+      --shadow: 0 18px 50px rgba(0,0,0,0.35);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.12) 16%, rgba(255,255,255,0.03) 28%, transparent 45%),
+        linear-gradient(180deg, #090909 0%, #060606 35%, #050505 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 68px 68px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.95));
+      z-index: 0;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,0.06), transparent 20%),
+        radial-gradient(circle at 85% 28%, rgba(255,255,255,0.05), transparent 18%),
+        radial-gradient(circle at 50% 78%, rgba(255,255,255,0.04), transparent 24%);
+      z-index: 0;
+    }
+
+    .brand-font {
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .background-layer {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .code-rain {
+      position: absolute;
+      top: -20vh;
+      color: rgba(255,255,255,0.10);
+      font-family: monospace;
+      white-space: nowrap;
+      animation: fall linear infinite;
+      filter: blur(0.2px);
+    }
+
+    .floating-symbol {
+      position: absolute;
+      color: rgba(255,255,255,0.08);
+      font-family: 'Orbitron', sans-serif;
+      animation: drift ease-in-out infinite;
+    }
+
+    @keyframes fall {
+      from { transform: translate3d(0, -15vh, 0) rotate(8deg); }
+      to   { transform: translate3d(-42px, 130vh, 0) rotate(8deg); }
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.08; }
+      50%       { transform: translateY(-18px) translateX(12px) scale(1.08); opacity: 0.18; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes lineSweep {
+      from { transform: translateX(-120%); }
+      to   { transform: translateX(120%); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.18); }
+      50%       { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+    }
+
+    /* ── WRAPPER ── */
+    .wrapper {
+      position: relative;
+      z-index: 2;
+      width: min(560px, calc(100vw - 24px));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding-bottom: 20px;
+    }
+
+    /* ── LOGO PILL ── */
+    .logo-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      color: rgba(255,255,255,0.72);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      animation: fadeUp 0.9s ease forwards;
+      margin-bottom: 20px;
+    }
+
+    .logo-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.92);
+      box-shadow: 0 0 20px rgba(255,255,255,0.65);
+      animation: pulse 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    /* ── MAIN CARD ── */
+    .main-card {
+      width: 100%;
+      border-radius: var(--radius-xl);
+      padding: 2px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.9s ease 0.1s forwards;
+      opacity: 0;
+    }
+
+    .main-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 10%, rgba(255,255,255,0.06) 48%, transparent 70%);
+      transform: translateX(-120%);
+      animation: lineSweep 7s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+      border-radius: 26px;
+      background: rgba(0,0,0,0.38);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 28px 24px 24px;
+    }
+
+    /* ── TOP INFO ── */
+    .top-label {
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.42);
+      margin-bottom: 6px;
+    }
+
+    .brand-title {
+      font-size: clamp(1.6rem, 8vw, 2.2rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: rgba(255,255,255,0.96);
+      margin-bottom: 4px;
+    }
+
+    .brand-sub {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.54);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+      margin-bottom: 22px;
+    }
+
+    /* ── COMING BADGE ── */
+    .coming-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.72);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.92);
+      box-shadow: 0 0 20px rgba(255,255,255,0.65);
+      animation: pulse 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    /* ── HEADLINE ── */
+    .headline {
+      font-size: clamp(1.8rem, 9vw, 2.6rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      margin-bottom: 14px;
+      color: rgba(255,255,255,0.95);
+    }
+
+    .headline span { color: rgba(255,255,255,0.55); }
+
+    .desc {
+      font-size: 0.93rem;
+      line-height: 1.85;
+      color: rgba(255,255,255,0.64);
+      max-width: 420px;
+      margin: 0 auto 24px;
+    }
+
+    /* ── COUNTDOWN ── */
+    .countdown-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .count-box {
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      border-radius: 18px;
+      padding: 14px 8px;
+    }
+
+    .count-num {
+      font-size: clamp(1.4rem, 6vw, 2rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: rgba(255,255,255,0.95);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .count-label {
+      font-size: 9px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.40);
+      margin-top: 6px;
+    }
+
+    /* ── NOTIFY BOX ── */
+    .notify-box {
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .notify-label {
+      font-size: 10px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.42);
+      margin-bottom: 10px;
+    }
+
+    .notify-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .notify-input {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 999px;
+      padding: 11px 16px;
+      color: rgba(255,255,255,0.9);
+      font-size: 0.88rem;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.3s;
+    }
+
+    .notify-input::placeholder { color: rgba(255,255,255,0.32); }
+    .notify-input:focus { border-color: rgba(255,255,255,0.30); }
+
+    .notify-btn {
+      background: #ffffff;
+      color: #070707;
+      border: none;
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.3s, box-shadow 0.3s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .notify-btn:hover {
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 8px 24px rgba(255,255,255,0.12);
+    }
+
+    .notify-msg {
+      font-size: 0.83rem;
+      margin-top: 8px;
+      min-height: 18px;
+      transition: opacity 0.4s;
+    }
+
+    /* ── FEATURE ROW ── */
+    .feature-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .feat-box {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      padding: 12px 8px;
+    }
+
+    .feat-icon { font-size: 18px; margin-bottom: 6px; }
+
+    .feat-label {
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.42);
+    }
+
+    .feat-text {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.82);
+      margin-top: 4px;
+    }
+
+    /* ── BOTTOM ROW ── */
+    .bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .brand-small {
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      color: rgba(255,255,255,0.36);
+    }
+
+    .insta-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.54);
+      font-size: 0.82rem;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      border-radius: 999px;
+      padding: 7px 12px;
+      transition: all 0.3s;
+    }
+
+    .insta-link:hover {
+      color: rgba(255,255,255,0.80);
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 480px) {
+      .card-inner { padding: 22px 16px 18px; }
+      .countdown-row { gap: 8px; }
+      .count-box { padding: 12px 6px; }
+      .feature-row { gap: 6px; }
+      .notify-row { flex-direction: column; }
+      .notify-btn { border-radius: 999px; padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="background-layer" id="backgroundLayer"></div>
+
+  <div class="wrapper">
+    <div class="logo-pill">
+      <span class="logo-dot"></span>
+      <span class="brand-font" style="font-size:9px;">YusaCoder</span>
+      <span>· Market Yakında</span>
+    </div>
+
+    <div class="main-card">
+      <div class="card-inner">
+
+        <div class="top-label">market.yusacoder.com</div>
+        <div class="brand-title brand-font">YusaCoder</div>
+        <div class="brand-sub">Market Platform</div>
+
+        <div class="divider"></div>
+
+        <div class="coming-badge">
+          <span class="badge-dot"></span>
+          Yakında Açılıyor
+        </div>
+
+        <h1 class="headline">
+          Yeni bir deneyim<br><span>yolda geliyor.</span>
+        </h1>
+
+        <p class="desc">
+          YusaCoder Market; dijital ürünler, temalar ve özel içerikler için
+          hazırlanıyor. Erken erişim için e-postanı bırak, açılıştan ilk haberdar olan ol.
+        </p>
+
+        <!-- COUNTDOWN -->
+        <div class="countdown-row">
+          <div class="count-box">
+            <div class="count-num brand-font" id="cd-days">--</div>
+            <div class="count-label">Gün</div>
+          </div>
+          <div class="count-box">
+            <div class="count-num brand-font" id="cd-hours">--</div>
+            <div class="count-label">Saat</div>
+          </div>
+          <div class="count-box">
+            <div class="count-num brand-font" id="cd-mins">--</div>
+            <div class="count-label">Dakika</div>
+          </div>
+          <div class="count-box">
+            <div class="count-num brand-font" id="cd-secs">--</div>
+            <div class="count-label">Saniye</div>
+          </div>
+        </div>
+
+        <!-- NOTIFY -->
+        <div class="notify-box">
+          <div class="notify-label">Erken Erişim Bildirimi Al</div>
+          <form
+            id="notifyForm"
+            action="https://formsubmit.co/yusayalin40@gmail.com"
+            method="POST"
+            onsubmit="return handleSubmit(event)"
+          >
+            <!-- FormSubmit ayarları -->
+            <input type="hidden" name="_subject" value="YusaCoder Market — Erken Erişim Talebi" />
+            <input type="hidden" name="_captcha" value="false" />
+            <input type="hidden" name="_template" value="table" />
+            <input type="hidden" name="_next" value="" id="nextUrl" />
+
+            <div class="notify-row">
+              <input
+                class="notify-input"
+                type="email"
+                name="email"
+                id="emailInput"
+                placeholder="e-posta@adresin.com"
+                required
+              />
+              <button class="notify-btn" type="submit" id="notifyBtn">Bildir</button>
+            </div>
+          </form>
+          <div class="notify-msg" id="notifyMsg"></div>
+        </div>
+
+        <!-- FEATURES -->
+        <div class="feature-row">
+          <div class="feat-box">
+            <div class="feat-icon">🛍️</div>
+            <div class="feat-label">Ürünler</div>
+            <div class="feat-text">Dijital İçerik</div>
+          </div>
+          <div class="feat-box">
+            <div class="feat-icon">🎨</div>
+            <div class="feat-label">Temalar</div>
+            <div class="feat-text">Özel Tasarım</div>
+          </div>
+          <div class="feat-box">
+            <div class="feat-icon">⚡</div>
+            <div class="feat-label">Erişim</div>
+            <div class="feat-text">Anlık Teslimat</div>
+          </div>
+        </div>
+
+        <!-- BOTTOM -->
+        <div class="bottom-row">
+          <div class="brand-small brand-font">© 2025–2026 YusaCoder</div>
+          <a
+            href="https://instagram.com/yusacoder"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="insta-link"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/>
+              <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
+              <circle cx="17.3" cy="6.7" r="1.1" fill="currentColor"/>
+            </svg>
+            @yusacoder
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ── COUNTDOWN ── */
+    const targetDate = new Date('2025-09-01T00:00:00');
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function updateCountdown() {
+      const now  = new Date();
+      const diff = targetDate - now;
+
+      if (diff <= 0) {
+        ['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id => {
+          document.getElementById(id).textContent = '00';
+        });
+        return;
+      }
+
+      const days  = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const mins  = Math.floor((diff % 3600000)  / 60000);
+      const secs  = Math.floor((diff % 60000)    / 1000);
+
+      document.getElementById('cd-days').textContent  = pad(days);
+      document.getElementById('cd-hours').textContent = pad(hours);
+      document.getElementById('cd-mins').textContent  = pad(mins);
+      document.getElementById('cd-secs').textContent  = pad(secs);
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    /* ── NOTIFY (FormSubmit) ── */
+    document.getElementById('nextUrl').value = window.location.href;
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      const form  = document.getElementById('notifyForm');
+      const msg   = document.getElementById('notifyMsg');
+      const btn   = document.getElementById('notifyBtn');
+      const input = document.getElementById('emailInput');
+      const val   = input.value.trim();
+
+      if (!val || !val.includes('@')) {
+        msg.style.color = 'rgba(255,100,100,0.8)';
+        msg.textContent = 'Geçerli bir e-posta adresi gir.';
+        return false;
+      }
+
+      btn.textContent = 'Gönderiliyor...';
+      btn.disabled = true;
+
+      fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'Accept': 'application/json' }
+      })
+      .then(res => {
+        if (res.ok) {
+          msg.style.color = 'rgba(100,255,180,0.8)';
+          msg.textContent = '✓ Harika! Açılışta seni haberdar edeceğiz.';
+          input.value = '';
+        } else {
+          msg.style.color = 'rgba(255,100,100,0.8)';
+          msg.textContent = 'Bir hata oluştu, tekrar dene.';
+        }
+      })
+      .catch(() => {
+        msg.style.color = 'rgba(255,100,100,0.8)';
+        msg.textContent = 'Bağlantı hatası, tekrar dene.';
+      })
+      .finally(() => {
+        btn.textContent = 'Bildir';
+        btn.disabled = false;
+      });
+
+      return false;
+    }
+
+    /* ── BACKGROUND ANIMATIONS ── */
+    const codeItems   = ['</>', '0101', 'market', 'shop', 'yenilik', 'return', '<div>', 'grid', 'açılıyor'];
+    const bgLayer     = document.getElementById('backgroundLayer');
+
+    for (let i = 0; i < 22; i++) {
+      const span = document.createElement('span');
+      span.className   = 'code-rain';
+      span.textContent = codeItems[Math.floor(Math.random() * codeItems.length)];
+      span.style.left              = Math.random() * 100 + '%';
+      span.style.fontSize          = (10 + Math.random() * 18) + 'px';
+      span.style.opacity           = (0.05 + Math.random() * 0.10).toFixed(2);
+      span.style.animationDuration = (16 + Math.random() * 18) + 's';
+      span.style.animationDelay    = (-Math.random() * 12) + 's';
+      bgLayer.appendChild(span);
+    }
+
+    for (let i = 0; i < 12; i++) {
+      const sym = document.createElement('span');
+      sym.className   = 'floating-symbol brand-font';
+      sym.textContent = i % 2 === 0 ? '</>' : '0101';
+      sym.style.left              = Math.random() * 100 + '%';
+      sym.style.top               = Math.random() * 100 + '%';
+      sym.style.fontSize          = (14 + Math.random() * 18) + 'px';
+      sym.style.animationDuration = (10 + Math.random() * 10) + 's';
+      sym.style.animationDelay    = (-Math.random() * 8) + 's';
+      bgLayer.appendChild(sym);
+    }
+  </script>
+</body>
+</html>
