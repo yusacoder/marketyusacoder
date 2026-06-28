@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ürün Detay — GameMarket</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">🎮</div>
+      <span class="logo-text">GameMarket</span>
+    </a>
+    <div class="nav-actions" style="margin-left:auto">
+      <a href="index.html" class="btn-fav-nav">← Markete Dön</a>
+    </div>
+  </div>
+</nav>
+
+<!-- DETAIL PAGE CONTAINER -->
+<div class="detail-page" id="detailPage">
+  <!-- JS tarafından doldurulacak -->
+  <div style="text-align:center;padding:80px 20px;color:var(--text-muted)">
+    <div style="font-size:48px;margin-bottom:16px">⏳</div>
+    <p>Ürün yükleniyor…</p>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="app.js"></script>
+<script>
+  // Product page specific init
+  document.addEventListener('DOMContentLoaded', () => {
+    window.GameMarket.initProductPage();
+  });
+</script>
+</body>
+</html>
