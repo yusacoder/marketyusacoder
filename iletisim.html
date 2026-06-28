@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ürün Detay — GameMarket</title>
+  <title>İletişim — GeassMarket</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -21,25 +21,25 @@
   </div>
 </nav>
 
-<!-- DETAIL PAGE CONTAINER -->
-<div class="detail-page" id="detailPage">
-  <!-- JS tarafından doldurulacak -->
-  <div style="text-align:center;padding:80px 20px;color:var(--text-muted)">
-    <div style="font-size:48px;margin-bottom:16px">⏳</div>
-    <p>Ürün yükleniyor…</p>
+<main class="content-page">
+  <h1 class="page-title">Bizimle <span>İletişime</span> Geçin</h1>
+
+  <div class="contact-grid">
+    <div class="contact-card">
+      <span class="contact-icon">📱</span>
+      <h3>WhatsApp Destek</h3>
+      <p>Sorularınız için bize WhatsApp üzerinden 7/24 ulaşabilirsiniz.</p>
+      <a href="https://wa.me/905431642475" target="_blank" class="btn-contact btn-whatsapp">WhatsApp'tan Yaz</a>
+    </div>
+
+    <div class="contact-card">
+      <span class="contact-icon">📧</span>
+      <h3>E-Posta</h3>
+      <p>Her türlü görüş ve öneriniz için bize mail atabilirsiniz.</p>
+      <a href="mailto:destek@yusacoder.com" class="btn-contact">Mail Gönder</a>
+    </div>
   </div>
-</div>
-
-<!-- TOAST -->
-<div class="toast-container" id="toastContainer"></div>
-
-<script src="app.js"></script>
-<script>
-  // Product page specific init
-  document.addEventListener('DOMContentLoaded', () => {
-    window.GameMarket.initProductPage();
-  });
-</script>
+</main>
 
 <!-- FOOTER -->
 <footer class="footer">
@@ -60,5 +60,8 @@
   </div>
   <div class="footer-bottom">© 2026 GeassMarket · Tüm hakları saklıdır</div>
 </footer>
+
+<div class="toast-container" id="toastContainer"></div>
+
 </body>
 </html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sıkça Sorulan Sorular — GeassMarket</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">🎮</div>
+      <span class="logo-text">GeassMarket</span>
+    </a>
+    <div class="nav-actions" style="margin-left:auto">
+      <a href="index.html" class="btn-fav-nav">← Markete Dön</a>
+    </div>
+  </div>
+</nav>
+
+<main class="content-page">
+  <h1 class="page-title">Sıkça Sorulan <span>Sorular</span></h1>
+
+  <div class="faq-container">
+    <div class="faq-item">
+      <button class="faq-question">Ürünler ne kadar sürede teslim edilir?</button>
+      <div class="faq-answer">
+        <p>Satın aldığınız ürünler, ödeme onayından sonra genellikle 5-15 dakika içerisinde WhatsApp üzerinden teslim edilir.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">Nasıl satın alabilirim?</button>
+      <div class="faq-answer">
+        <p>İstediğiniz ürünün detay sayfasındaki "WhatsApp ile Satın Al" butonuna basarak bizimle iletişime geçebilirsiniz. Ödeme yöntemlerini WhatsApp üzerinden paylaşıyoruz.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">Ödeme yöntemleri nelerdir?</button>
+      <div class="faq-answer">
+        <p>Havale/EFT ve Papara üzerinden güvenli bir şekilde ödeme yapabilirsiniz.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">Ürünler güvenilir mi?</button>
+      <div class="faq-answer">
+        <p>Tüm ürünlerimiz %100 orijinal ve resmi kanallardan temin edilmektedir. Herhangi bir ban riski taşımaz.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">İade yapabilir miyim?</button>
+      <div class="faq-answer">
+        <p>Dijital ürünlerde teslimat gerçekleştikten sonra iade yapılamamaktadır. Ancak bir sorun yaşarsanız destek ekibimiz her zaman yanınızdadır.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-left">
+      <div class="brand">GeassMarket</div>
+      <p class="desc">Güvenli ödeme · Anında teslimat · 7/24 WhatsApp destek</p>
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Ana Sayfa</a>
+      <a href="sss.html">SSS</a>
+      <a href="iletisim.html">İletişim</a>
+    </div>
+    <div class="footer-support">
+      <p>📞 WhatsApp Destek</p>
+      <a href="https://wa.me/905431642475">Hemen Yaz</a>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 GeassMarket · Tüm hakları saklıdır</div>
+</footer>
+
+<script>
+  // FAQ Accordion Logic
+  document.querySelectorAll('.faq-question').forEach(button => {
+    button.addEventListener('click', () => {
+      const faqItem = button.parentElement;
+      faqItem.classList.toggle('active');
+    });
+  });
+</script>
+
+</body>
+</html>
