@@ -1108,3 +1108,75 @@ input, select { font-family: inherit; }
 @media (max-width: 640px) {
   .mobile-search-wrap { display: block; }
 }
+.footer{
+  background:#0b0b0f;
+  border-top:1px solid #1f1f2a;
+  color:#aaa;
+  margin-top:40px;
+}
+
+.footer-container{
+  display:flex;
+  justify-content:space-between;
+  gap:30px;
+  padding:30px 20px;
+  flex-wrap:wrap;
+  max-width:1200px;
+  margin:auto;
+}
+
+.brand{
+  font-size:20px;
+  font-weight:bold;
+  color:white;
+}
+
+.desc{
+  font-size:13px;
+  margin-top:8px;
+  color:#888;
+  max-width:250px;
+  line-height:1.5;
+}
+
+.footer-links{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.footer-links a{
+  color:#aaa;
+  text-decoration:none;
+  font-size:14px;
+  transition:0.2s;
+}
+
+.footer-links a:hover{
+  color:#fff;
+  transform:translateX(4px);
+}
+
+.footer-support a{
+  display:inline-block;
+  margin-top:5px;
+  padding:8px 12px;
+  background:#25D366;
+  color:white;
+  border-radius:6px;
+  text-decoration:none;
+  font-size:13px;
+  transition:0.2s;
+}
+
+.footer-support a:hover{
+  background:#1ebe5d;
+}
+
+.footer-bottom{
+  text-align:center;
+  padding:12px;
+  font-size:12px;
+  border-top:1px solid #1f1f2a;
+  color:#666;
+}
