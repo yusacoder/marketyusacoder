@@ -1,0 +1,199 @@
+[
+  {
+    "id": "G001",
+    "name": "PUBG Mobile 660 UC",
+    "price": 120.00,
+    "images": [
+      "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=400&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=400&auto=format&fit=crop"
+    ],
+    "description": "PUBG Mobile için 660 UC yüklemesi. Hızlı ve güvenli teslimat.",
+    "category": "PUBG",
+    "stock": true,
+    "popular": true,
+    "new": false
+  },
+  {
+    "id": "G002",
+    "name": "Valorant 1200 VP",
+    "price": 150.00,
+    "images": [
+      "https://images.unsplash.com/photo-1624138784614-87fd1b6528f8?q=80&w=400&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1614027164847-1b2809eb189d?q=80&w=400&auto=format&fit=crop"
+    ],
+    "description": "Valorant Points (VP) ile yeni kaplamalar ve ajanlar açın.",
+    "category": "Valorant",
+    "stock": true,
+    "popular": true,
+    "new": true
+  },
+  {
+    "id": "G003",
+    "name": "Steam 100 TL Cüzdan Kodu",
+    "price": 100.00,
+    "images": [
+      "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?q=80&w=400&auto=format&fit=crop"
+    ],
+    "description": "Steam hesabınıza 100 TL bakiye ekleyin. Tüm oyunlarda geçerlidir.",
+    "category": "Steam",
+    "stock": true,
+    "popular": false,
+    "new": false
+  },
+  {
+    "id": "G004",
+    "name": "Roblox 800 Robux",
+    "price": 85.00,
+    "images": [
+      "https://images.unsplash.com/photo-1605898399719-1e79328a6f2b?q=80&w=400&auto=format&fit=crop"
+    ],
+    "description": "Roblox dünyasında dilediğiniz gibi harcayabileceğiniz 800 Robux.",
+    "category": "Roblox",
+    "stock": true,
+    "popular": false,
+    "new": true
+  },
+  {
+    "id": "G005",
+    "name": "League of Legends 1500 RP",
+    "price": 130.00,
+    "images": [
+      "https://images.unsplash.com/photo-1542751110-97427bbecf20?q=80&w=400&auto=format&fit=crop"
+    ],
+    "description": "League of Legends (LoL) Riot Points ile şampiyon ve kostüm alın.",
+    "category": "LoL",
+    "stock": false,
+    "popular": false,
+    "new": false
+  },
+  {
+    "id": "G006",
+    "name": "Minecraft Java & Bedrock",
+    "price": 300.00,
+    "images": [
+      "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?q=80&w=400&auto=format&fit=crop"
+    ],
+    "description": "Minecraft'ın her iki versiyonuna da tek paketle sahip olun.",
+    "category": "Minecraft",
+    "stock": true,
+    "popular": true,
+    "new": false
+  },
+  {
+    "id": "G007",
+    "name": "Fortnite 1000 V-Bucks",
+    "price": 95.00,
+    "images": [
+      "https://images.unsplash.com/photo-1589241062272-c0a000072dfa?q=80&w=400&auto=format&fit=crop"
+    ],
+    "description": "Fortnite mağazasında geçerli 1000 V-Papel.",
+    "category": "Fortnite",
+    "stock": true,
+    "popular": false,
+    "new": false
+  },
+  {
+    "id": "G008",
+    "name": "Free Fire 530 Diamonds",
+    "price": 75.00,
+    "images": [
+      "https://images.unsplash.com/photo-1614027164847-1b2809eb189d?q=80&w=400&auto=format&fit=crop"
+    ],
+    "description": "Free Fire elmas yüklemesi ile rakiplerinizin önüne geçin.",
+    "category": "Free Fire",
+    "stock": true,
+    "popular": false,
+    "new": false
+  },
+  {
+    "id": "G009",
+    "name": "PUBG Mobile 1800 UC",
+    "price": 320.00,
+    "images": [
+      "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=400&auto=format&fit=crop"
+    ],
+    "description": "PUBG Mobile için 1800 UC yüklemesi. Royale Pass için ideal.",
+    "category": "PUBG",
+    "stock": true,
+    "popular": true,
+    "new": true
+  },
+  {
+    "id": "G010",
+    "name": "Valorant 2850 VP",
+    "price": 340.00,
+    "images": [
+      "https://images.unsplash.com/photo-1624138784614-87fd1b6528f8?q=80&w=400&auto=format&fit=crop"
+    ],
+    "description": "Daha fazla VP, daha fazla kostüm. Valorant keyfini katlayın.",
+    "category": "Valorant",
+    "stock": true,
+    "popular": false,
+    "new": false
+  },
+  {
+    "id": "G011",
+    "name": "Steam 250 TL Cüzdan Kodu",
+    "price": 250.00,
+    "images": [
+      "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?q=80&w=400&auto=format&fit=crop"
+    ],
+    "description": "250 TL değerinde Steam cüzdan kodu.",
+    "category": "Steam",
+    "stock": true,
+    "popular": false,
+    "new": true
+  },
+  {
+    "id": "G012",
+    "name": "Roblox 1700 Robux",
+    "price": 170.00,
+    "images": [
+      "https://images.unsplash.com/photo-1605898399719-1e79328a6f2b?q=80&w=400&auto=format&fit=crop"
+    ],
+    "description": "1700 Robux ile avatarınızı dilediğiniz gibi özelleştirin.",
+    "category": "Roblox",
+    "stock": true,
+    "popular": true,
+    "new": false
+  },
+  {
+    "id": "G013",
+    "name": "Discord Nitro 1 Ay",
+    "price": 105.00,
+    "images": [
+      "https://images.unsplash.com/photo-1611606063065-ee7946f0787a?q=80&w=400&auto=format&fit=crop"
+    ],
+    "description": "Özel emojiler, büyük dosya yükleme ve sunucu takviyesi.",
+    "category": "Discord",
+    "stock": true,
+    "popular": true,
+    "new": false
+  },
+  {
+    "id": "G014",
+    "name": "Netflix 100 TL Hediye Kartı",
+    "price": 100.00,
+    "images": [
+      "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?q=80&w=400&auto=format&fit=crop"
+    ],
+    "description": "Netflix aboneliğinizde kullanabileceğiniz hediye kartı.",
+    "category": "Dijital",
+    "stock": true,
+    "popular": false,
+    "new": false
+  },
+  {
+    "id": "G015",
+    "name": "Spotify Premium 3 Ay",
+    "price": 90.00,
+    "images": [
+      "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?q=80&w=400&auto=format&fit=crop"
+    ],
+    "description": "Kesintisiz müzik keyfi için 3 aylık Spotify Premium.",
+    "category": "Dijital",
+    "stock": true,
+    "popular": false,
+    "new": false
+  }
+]
