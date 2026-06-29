@@ -1,4 +1,49 @@
 {
   "whatsapp": "+905551234567",
-  "products": []
+  "products": [
+    {
+      "id": "PUBG-60",
+      "name": "60 UC - PUBG Mobile",
+      "category": "PUBG",
+      "price": 35.0,
+      "description": "60 UC instant delivery to your account.",
+      "stock": true,
+      "popular": true,
+      "new": false,
+      "images": ["https://placehold.co/400x240/e84a00/white?text=60+UC"]
+    },
+    {
+      "id": "VAL-1000",
+      "name": "1000 VP - Valorant",
+      "category": "Valorant",
+      "price": 150.0,
+      "description": "1000 Valorant Points for your skins.",
+      "stock": true,
+      "popular": true,
+      "new": true,
+      "images": ["https://placehold.co/400x240/ff4655/white?text=1000+VP"]
+    },
+    {
+      "id": "STM-50",
+      "name": "50 TL Steam Wallet",
+      "category": "Steam",
+      "price": 50.0,
+      "description": "50 TL Steam Wallet code.",
+      "stock": true,
+      "popular": false,
+      "new": false,
+      "images": ["https://placehold.co/400x240/1b9edb/white?text=50TL+Steam"]
+    },
+    {
+      "id": "ROB-800",
+      "name": "800 Robux",
+      "category": "Roblox",
+      "price": 120.0,
+      "description": "800 Robux for your avatar.",
+      "stock": true,
+      "popular": false,
+      "new": true,
+      "images": ["https://placehold.co/400x240/00b2ff/white?text=800+Robux"]
+    }
+  ]
 }

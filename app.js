@@ -63,6 +63,14 @@ function copyToClipboard(text) {
   }
 }
 
+function debounce(fn, delay) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 // ── Favorites (localStorage) ───────────────────────────────────────────────
 
 const Favorites = {
@@ -105,9 +113,25 @@ const Market = {
   sortBy: 'default',
   searchQuery: '',
   showFavs: false,
+  els: {},
 
   async init() {
     try {
+      // Cache critical elements
+      this.els = {
+        grid:      document.getElementById('productsGrid'),
+        catFilter: document.getElementById('categoryFilters'),
+        search:    document.getElementById('searchInput'),
+        searchMob: document.getElementById('searchInputMobile'),
+        sort:      document.getElementById('sortSelect'),
+        navFav:    document.getElementById('navFavBtn'),
+        viewFavs:  document.getElementById('viewFavs'),
+        viewAll:   document.getElementById('viewAll'),
+        paging:    document.getElementById('pagination'),
+        resCount:  document.getElementById('resultsCount'),
+        favCount:  document.getElementById('navFavCount'),
+      };
+
       const data = await fetchData();
       this.allProducts = data.products || [];
       this.whatsapp = data.whatsapp || '';
@@ -116,14 +140,17 @@ const Market = {
       this.applyFilters();
       this.updateFavCount();
     } catch (e) {
-      document.getElementById('productsGrid').innerHTML =
-        `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Veri yüklenemedi</h3><p>${e.message}</p></div>`;
+      if (this.els.grid) {
+        this.els.grid.innerHTML =
+          `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Veri yüklenemedi</h3><p>${e.message}</p></div>`;
+      }
     }
   },
 
   buildCategoryFilters() {
     const categories = [...new Set(this.allProducts.map(p => p.category))];
-    const container = document.getElementById('categoryFilters');
+    const container = this.els.catFilter;
+    if (!container) return;
 
     categories.forEach(cat => {
       const btn = document.createElement('button');
@@ -137,72 +164,80 @@ const Market = {
 
   bindEvents() {
     // Category buttons
-    document.getElementById('categoryFilters').addEventListener('click', e => {
-      const btn = e.target.closest('.cat-btn');
-      if (!btn) return;
-      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      this.activeCategory = btn.dataset.cat;
-      this.currentPage = 1;
-      this.applyFilters();
-    });
-
-    // Search (desktop)
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-      searchInput.addEventListener('input', () => {
-        this.searchQuery = searchInput.value.trim().toLowerCase();
-        const mob = document.getElementById('searchInputMobile');
-        if (mob) mob.value = searchInput.value;
+    if (this.els.catFilter) {
+      this.els.catFilter.addEventListener('click', e => {
+        const btn = e.target.closest('.cat-btn');
+        if (!btn) return;
+        this.els.catFilter.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.activeCategory = btn.dataset.cat;
         this.currentPage = 1;
         this.applyFilters();
       });
     }
 
-    // Search (mobile)
-    const mobileSearch = document.getElementById('searchInputMobile');
-    if (mobileSearch) {
-      mobileSearch.addEventListener('input', () => {
-        this.searchQuery = mobileSearch.value.trim().toLowerCase();
-        const desk = document.getElementById('searchInput');
-        if (desk) desk.value = mobileSearch.value;
-        this.currentPage = 1;
-        this.applyFilters();
+    // Search (desktop & mobile sync with debounce)
+    const debouncedFilter = debounce(() => {
+      this.currentPage = 1;
+      this.applyFilters();
+    }, 300);
+
+    if (this.els.search) {
+      this.els.search.addEventListener('input', () => {
+        this.searchQuery = this.els.search.value.trim().toLowerCase();
+        if (this.els.searchMob) this.els.searchMob.value = this.els.search.value;
+        debouncedFilter();
+      });
+    }
+
+    if (this.els.searchMob) {
+      this.els.searchMob.addEventListener('input', () => {
+        this.searchQuery = this.els.searchMob.value.trim().toLowerCase();
+        if (this.els.search) this.els.search.value = this.els.searchMob.value;
+        debouncedFilter();
       });
     }
 
     // Sort
-    document.getElementById('sortSelect').addEventListener('change', e => {
-      this.sortBy = e.target.value;
-      this.currentPage = 1;
-      this.applyFilters();
-    });
+    if (this.els.sort) {
+      this.els.sort.addEventListener('change', e => {
+        this.sortBy = e.target.value;
+        this.currentPage = 1;
+        this.applyFilters();
+      });
+    }
 
     // Favorites nav button
-    document.getElementById('navFavBtn').addEventListener('click', () => {
-      this.showFavs = !this.showFavs;
-      document.getElementById('viewFavs').classList.toggle('active', this.showFavs);
-      document.getElementById('viewAll').classList.toggle('active', !this.showFavs);
-      this.currentPage = 1;
-      this.applyFilters();
-    });
+    if (this.els.navFav) {
+      this.els.navFav.addEventListener('click', () => {
+        this.showFavs = !this.showFavs;
+        if (this.els.viewFavs) this.els.viewFavs.classList.toggle('active', this.showFavs);
+        if (this.els.viewAll) this.els.viewAll.classList.toggle('active', !this.showFavs);
+        this.currentPage = 1;
+        this.applyFilters();
+      });
+    }
 
     // View toggle buttons
-    document.getElementById('viewAll').addEventListener('click', () => {
-      this.showFavs = false;
-      document.getElementById('viewAll').classList.add('active');
-      document.getElementById('viewFavs').classList.remove('active');
-      this.currentPage = 1;
-      this.applyFilters();
-    });
+    if (this.els.viewAll) {
+      this.els.viewAll.addEventListener('click', () => {
+        this.showFavs = false;
+        this.els.viewAll.classList.add('active');
+        if (this.els.viewFavs) this.els.viewFavs.classList.remove('active');
+        this.currentPage = 1;
+        this.applyFilters();
+      });
+    }
 
-    document.getElementById('viewFavs').addEventListener('click', () => {
-      this.showFavs = true;
-      document.getElementById('viewFavs').classList.add('active');
-      document.getElementById('viewAll').classList.remove('active');
-      this.currentPage = 1;
-      this.applyFilters();
-    });
+    if (this.els.viewFavs) {
+      this.els.viewFavs.addEventListener('click', () => {
+        this.showFavs = true;
+        this.els.viewFavs.classList.add('active');
+        if (this.els.viewAll) this.els.viewAll.classList.remove('active');
+        this.currentPage = 1;
+        this.applyFilters();
+      });
+    }
   },
 
   applyFilters() {
@@ -245,7 +280,8 @@ const Market = {
   },
 
   renderGrid() {
-    const grid = document.getElementById('productsGrid');
+    const grid = this.els.grid;
+    if (!grid) return;
     const start = (this.currentPage - 1) * this.perPage;
     const page = this.filtered.slice(start, start + this.perPage);
 
@@ -327,7 +363,8 @@ const Market = {
 
   renderPagination() {
     const total = Math.ceil(this.filtered.length / this.perPage);
-    const pg = document.getElementById('pagination');
+    const pg = this.els.paging;
+    if (!pg) return;
     if (total <= 1) { pg.innerHTML = ''; return; }
 
     let html = `<button class="page-btn" id="pgPrev" ${this.currentPage === 1 ? 'disabled' : ''}>‹ Önceki</button>`;
@@ -363,12 +400,12 @@ const Market = {
   },
 
   updateResultsCount() {
-    const el = document.getElementById('resultsCount');
+    const el = this.els.resCount;
     if (el) el.textContent = `${this.filtered.length} ürün`;
   },
 
   updateFavCount() {
-    const el = document.getElementById('navFavCount');
+    const el = this.els.favCount;
     if (el) el.textContent = Favorites.count();
   }
 };
