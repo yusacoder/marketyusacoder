@@ -1,4 +1,38 @@
 {
   "whatsapp": "+905551234567",
-  "products": []
+  "products": [
+    {
+      "id": "PUBG-660",
+      "name": "660 UC",
+      "category": "PUBG",
+      "price": 325.00,
+      "description": "PUBG Mobile 660 UC yüklemesi.",
+      "stock": true,
+      "popular": true,
+      "new": false,
+      "images": ["https://placehold.co/400x240/13131f/555577?text=660+UC"]
+    },
+    {
+      "id": "VAL-1200",
+      "name": "1200 VP",
+      "category": "Valorant",
+      "price": 250.00,
+      "description": "Valorant 1200 VP Points.",
+      "stock": true,
+      "popular": false,
+      "new": true,
+      "images": ["https://placehold.co/400x240/13131f/555577?text=1200+VP"]
+    },
+    {
+      "id": "STEAM-100",
+      "name": "100 TL Cüzdan Kodu",
+      "category": "Steam",
+      "price": 100.00,
+      "description": "Steam 100 TL Cüzdan Kodu.",
+      "stock": true,
+      "popular": false,
+      "new": false,
+      "images": ["https://placehold.co/400x240/13131f/555577?text=Steam+100"]
+    }
+  ]
 }

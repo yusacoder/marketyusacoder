@@ -35,7 +35,7 @@ function getCatColor(cat) {
 }
 
 function toast(msg, type = 'success', duration = 2500) {
-  const container = document.getElementById('toastContainer');
+  const container = Market.els.toastContainer || document.getElementById('toastContainer');
   if (!container) return;
   const el = document.createElement('div');
   el.className = `toast ${type}`;
@@ -61,6 +61,14 @@ function copyToClipboard(text) {
     document.execCommand('copy');
     ta.remove();
   }
+}
+
+function debounce(fn, delay) {
+  let timeoutId;
+  return function(...args) {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn.apply(this, args), delay);
+  };
 }
 
 // ── Favorites (localStorage) ───────────────────────────────────────────────
@@ -105,9 +113,11 @@ const Market = {
   sortBy: 'default',
   searchQuery: '',
   showFavs: false,
+  els: {},
 
   async init() {
     try {
+      this.cacheElements();
       const data = await fetchData();
       this.allProducts = data.products || [];
       this.whatsapp = data.whatsapp || '';
@@ -116,14 +126,34 @@ const Market = {
       this.applyFilters();
       this.updateFavCount();
     } catch (e) {
-      document.getElementById('productsGrid').innerHTML =
-        `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Veri yüklenemedi</h3><p>${e.message}</p></div>`;
+      if (this.els.productsGrid) {
+        this.els.productsGrid.innerHTML =
+          `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Veri yüklenemedi</h3><p>${e.message}</p></div>`;
+      }
     }
+  },
+
+  cacheElements() {
+    this.els = {
+      productsGrid:      document.getElementById('productsGrid'),
+      categoryFilters:   document.getElementById('categoryFilters'),
+      searchInput:       document.getElementById('searchInput'),
+      searchInputMobile: document.getElementById('searchInputMobile'),
+      sortSelect:        document.getElementById('sortSelect'),
+      navFavBtn:         document.getElementById('navFavBtn'),
+      viewAll:           document.getElementById('viewAll'),
+      viewFavs:          document.getElementById('viewFavs'),
+      pagination:        document.getElementById('pagination'),
+      resultsCount:      document.getElementById('resultsCount'),
+      navFavCount:       document.getElementById('navFavCount'),
+      toastContainer:    document.getElementById('toastContainer')
+    };
   },
 
   buildCategoryFilters() {
     const categories = [...new Set(this.allProducts.map(p => p.category))];
-    const container = document.getElementById('categoryFilters');
+    const container = this.els.categoryFilters;
+    if (!container) return;
 
     categories.forEach(cat => {
       const btn = document.createElement('button');
@@ -136,73 +166,81 @@ const Market = {
   },
 
   bindEvents() {
-    // Category buttons
-    document.getElementById('categoryFilters').addEventListener('click', e => {
-      const btn = e.target.closest('.cat-btn');
-      if (!btn) return;
-      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      this.activeCategory = btn.dataset.cat;
-      this.currentPage = 1;
-      this.applyFilters();
-    });
+    const debouncedFilter = debounce(() => this.applyFilters(), 300);
 
-    // Search (desktop)
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-      searchInput.addEventListener('input', () => {
-        this.searchQuery = searchInput.value.trim().toLowerCase();
-        const mob = document.getElementById('searchInputMobile');
-        if (mob) mob.value = searchInput.value;
+    // Category buttons
+    if (this.els.categoryFilters) {
+      this.els.categoryFilters.addEventListener('click', e => {
+        const btn = e.target.closest('.cat-btn');
+        if (!btn) return;
+        this.els.categoryFilters.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.activeCategory = btn.dataset.cat;
         this.currentPage = 1;
         this.applyFilters();
+      });
+    }
+
+    // Search (desktop)
+    if (this.els.searchInput) {
+      this.els.searchInput.addEventListener('input', () => {
+        this.searchQuery = this.els.searchInput.value.trim().toLowerCase();
+        if (this.els.searchInputMobile) this.els.searchInputMobile.value = this.els.searchInput.value;
+        this.currentPage = 1;
+        debouncedFilter();
       });
     }
 
     // Search (mobile)
-    const mobileSearch = document.getElementById('searchInputMobile');
-    if (mobileSearch) {
-      mobileSearch.addEventListener('input', () => {
-        this.searchQuery = mobileSearch.value.trim().toLowerCase();
-        const desk = document.getElementById('searchInput');
-        if (desk) desk.value = mobileSearch.value;
+    if (this.els.searchInputMobile) {
+      this.els.searchInputMobile.addEventListener('input', () => {
+        this.searchQuery = this.els.searchInputMobile.value.trim().toLowerCase();
+        if (this.els.searchInput) this.els.searchInput.value = this.els.searchInputMobile.value;
+        this.currentPage = 1;
+        debouncedFilter();
+      });
+    }
+
+    // Sort
+    if (this.els.sortSelect) {
+      this.els.sortSelect.addEventListener('change', e => {
+        this.sortBy = e.target.value;
         this.currentPage = 1;
         this.applyFilters();
       });
     }
 
-    // Sort
-    document.getElementById('sortSelect').addEventListener('change', e => {
-      this.sortBy = e.target.value;
-      this.currentPage = 1;
-      this.applyFilters();
-    });
-
     // Favorites nav button
-    document.getElementById('navFavBtn').addEventListener('click', () => {
-      this.showFavs = !this.showFavs;
-      document.getElementById('viewFavs').classList.toggle('active', this.showFavs);
-      document.getElementById('viewAll').classList.toggle('active', !this.showFavs);
-      this.currentPage = 1;
-      this.applyFilters();
-    });
+    if (this.els.navFavBtn) {
+      this.els.navFavBtn.addEventListener('click', () => {
+        this.showFavs = !this.showFavs;
+        if (this.els.viewFavs) this.els.viewFavs.classList.toggle('active', this.showFavs);
+        if (this.els.viewAll) this.els.viewAll.classList.toggle('active', !this.showFavs);
+        this.currentPage = 1;
+        this.applyFilters();
+      });
+    }
 
     // View toggle buttons
-    document.getElementById('viewAll').addEventListener('click', () => {
-      this.showFavs = false;
-      document.getElementById('viewAll').classList.add('active');
-      document.getElementById('viewFavs').classList.remove('active');
-      this.currentPage = 1;
-      this.applyFilters();
-    });
+    if (this.els.viewAll) {
+      this.els.viewAll.addEventListener('click', () => {
+        this.showFavs = false;
+        this.els.viewAll.classList.add('active');
+        if (this.els.viewFavs) this.els.viewFavs.classList.remove('active');
+        this.currentPage = 1;
+        this.applyFilters();
+      });
+    }
 
-    document.getElementById('viewFavs').addEventListener('click', () => {
-      this.showFavs = true;
-      document.getElementById('viewFavs').classList.add('active');
-      document.getElementById('viewAll').classList.remove('active');
-      this.currentPage = 1;
-      this.applyFilters();
-    });
+    if (this.els.viewFavs) {
+      this.els.viewFavs.addEventListener('click', () => {
+        this.showFavs = true;
+        this.els.viewFavs.classList.add('active');
+        if (this.els.viewAll) this.els.viewAll.classList.remove('active');
+        this.currentPage = 1;
+        this.applyFilters();
+      });
+    }
   },
 
   applyFilters() {
@@ -245,7 +283,8 @@ const Market = {
   },
 
   renderGrid() {
-    const grid = document.getElementById('productsGrid');
+    const grid = this.els.productsGrid;
+    if (!grid) return;
     const start = (this.currentPage - 1) * this.perPage;
     const page = this.filtered.slice(start, start + this.perPage);
 
@@ -327,7 +366,8 @@ const Market = {
 
   renderPagination() {
     const total = Math.ceil(this.filtered.length / this.perPage);
-    const pg = document.getElementById('pagination');
+    const pg = this.els.pagination;
+    if (!pg) return;
     if (total <= 1) { pg.innerHTML = ''; return; }
 
     let html = `<button class="page-btn" id="pgPrev" ${this.currentPage === 1 ? 'disabled' : ''}>‹ Önceki</button>`;
@@ -363,12 +403,12 @@ const Market = {
   },
 
   updateResultsCount() {
-    const el = document.getElementById('resultsCount');
+    const el = this.els.resultsCount;
     if (el) el.textContent = `${this.filtered.length} ürün`;
   },
 
   updateFavCount() {
-    const el = document.getElementById('navFavCount');
+    const el = this.els.navFavCount;
     if (el) el.textContent = Favorites.count();
   }
 };
