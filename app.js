@@ -63,6 +63,17 @@ function copyToClipboard(text) {
   }
 }
 
+/**
+ * Reusable debounce helper to limit execution frequency of a function.
+ */
+function debounce(fn, delay) {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  };
+}
+
 // ── Favorites (localStorage) ───────────────────────────────────────────────
 
 const Favorites = {
@@ -147,6 +158,9 @@ const Market = {
       this.applyFilters();
     });
 
+    // Debounced filter to avoid expensive operations on every keystroke
+    const debouncedApplyFilters = debounce(() => this.applyFilters(), 300);
+
     // Search (desktop)
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
@@ -155,7 +169,7 @@ const Market = {
         const mob = document.getElementById('searchInputMobile');
         if (mob) mob.value = searchInput.value;
         this.currentPage = 1;
-        this.applyFilters();
+        debouncedApplyFilters();
       });
     }
 
@@ -167,7 +181,7 @@ const Market = {
         const desk = document.getElementById('searchInput');
         if (desk) desk.value = mobileSearch.value;
         this.currentPage = 1;
-        this.applyFilters();
+        debouncedApplyFilters();
       });
     }
 
