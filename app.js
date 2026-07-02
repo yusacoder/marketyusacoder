@@ -63,6 +63,20 @@ function copyToClipboard(text) {
   }
 }
 
+/**
+ * Limits the rate at which a function can fire.
+ * @param {Function} fn - The function to debounce.
+ * @param {number} delay - The delay in milliseconds.
+ * @returns {Function} - The debounced function.
+ */
+function debounce(fn, delay) {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  };
+}
+
 // ── Favorites (localStorage) ───────────────────────────────────────────────
 
 const Favorites = {
@@ -105,9 +119,13 @@ const Market = {
   sortBy: 'default',
   searchQuery: '',
   showFavs: false,
+  debouncedApplyFilters: null,
 
   async init() {
     try {
+      // Initialize debounced version of applyFilters to optimize search performance
+      this.debouncedApplyFilters = debounce(this.applyFilters.bind(this), 300);
+
       const data = await fetchData();
       this.allProducts = data.products || [];
       this.whatsapp = data.whatsapp || '';
@@ -155,7 +173,7 @@ const Market = {
         const mob = document.getElementById('searchInputMobile');
         if (mob) mob.value = searchInput.value;
         this.currentPage = 1;
-        this.applyFilters();
+        this.debouncedApplyFilters();
       });
     }
 
@@ -167,7 +185,7 @@ const Market = {
         const desk = document.getElementById('searchInput');
         if (desk) desk.value = mobileSearch.value;
         this.currentPage = 1;
-        this.applyFilters();
+        this.debouncedApplyFilters();
       });
     }
 
@@ -205,6 +223,10 @@ const Market = {
     });
   },
 
+  /**
+   * Filters and sorts products based on current state (search, category, favs, sort).
+   * Note: This method is debounced for search input to prevent performance bottlenecks.
+   */
   applyFilters() {
     let products = [...this.allProducts];
 
