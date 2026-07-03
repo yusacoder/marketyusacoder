@@ -63,6 +63,14 @@ function copyToClipboard(text) {
   }
 }
 
+function debounce(fn, delay) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 // ── Favorites (localStorage) ───────────────────────────────────────────────
 
 const Favorites = {
@@ -147,6 +155,9 @@ const Market = {
       this.applyFilters();
     });
 
+    // Debounced filter for search
+    const debouncedFilter = debounce(() => this.applyFilters(), 300);
+
     // Search (desktop)
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
@@ -155,7 +166,7 @@ const Market = {
         const mob = document.getElementById('searchInputMobile');
         if (mob) mob.value = searchInput.value;
         this.currentPage = 1;
-        this.applyFilters();
+        debouncedFilter();
       });
     }
 
@@ -167,7 +178,7 @@ const Market = {
         const desk = document.getElementById('searchInput');
         if (desk) desk.value = mobileSearch.value;
         this.currentPage = 1;
-        this.applyFilters();
+        debouncedFilter();
       });
     }
 
