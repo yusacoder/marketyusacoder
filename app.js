@@ -30,6 +30,14 @@ function formatPrice(price) {
   return price.toFixed(2).replace('.', ',') + ' ₺';
 }
 
+function debounce(fn, delay) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 function getCatColor(cat) {
   return CAT_COLORS[cat] || '#e94560';
 }
@@ -109,7 +117,11 @@ const Market = {
   async init() {
     try {
       const data = await fetchData();
-      this.allProducts = data.products || [];
+      // Pre-calculate search index for better performance
+      this.allProducts = (data.products || []).map(p => ({
+        ...p,
+        _searchIndex: `${p.name} ${p.id} ${p.category} ${p.description}`.toLowerCase()
+      }));
       this.whatsapp = data.whatsapp || '';
       this.buildCategoryFilters();
       this.bindEvents();
@@ -149,13 +161,15 @@ const Market = {
 
     // Search (desktop)
     const searchInput = document.getElementById('searchInput');
+    const debouncedFilter = debounce(() => this.applyFilters(), 300);
+
     if (searchInput) {
       searchInput.addEventListener('input', () => {
         this.searchQuery = searchInput.value.trim().toLowerCase();
         const mob = document.getElementById('searchInputMobile');
         if (mob) mob.value = searchInput.value;
         this.currentPage = 1;
-        this.applyFilters();
+        debouncedFilter();
       });
     }
 
@@ -167,7 +181,7 @@ const Market = {
         const desk = document.getElementById('searchInput');
         if (desk) desk.value = mobileSearch.value;
         this.currentPage = 1;
-        this.applyFilters();
+        debouncedFilter();
       });
     }
 
@@ -219,14 +233,9 @@ const Market = {
       products = products.filter(p => p.category === this.activeCategory);
     }
 
-    // Search
+    // Search - Using pre-calculated index
     if (this.searchQuery) {
-      products = products.filter(p =>
-        p.name.toLowerCase().includes(this.searchQuery) ||
-        p.id.toLowerCase().includes(this.searchQuery) ||
-        p.category.toLowerCase().includes(this.searchQuery) ||
-        p.description.toLowerCase().includes(this.searchQuery)
-      );
+      products = products.filter(p => p._searchIndex.includes(this.searchQuery));
     }
 
     // Sort
