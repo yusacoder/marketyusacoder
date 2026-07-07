@@ -1,4 +1,29 @@
 {
-  "whatsapp": "+905551234567",
-  "products": []
+  "whatsapp": "905551234567",
+  "products": [
+    {
+      "id": "P-101",
+      "name": "PUBG Mobile UC",
+      "category": "PUBG",
+      "description": "Cheap UC for PUBG Mobile",
+      "price": 100.0,
+      "stock": true
+    },
+    {
+      "id": "P-202",
+      "name": "Valorant Points",
+      "category": "Valorant",
+      "description": "VP for Valorant skins",
+      "price": 200.0,
+      "stock": true
+    },
+    {
+      "id": "P-303",
+      "name": "Steam Wallet Card",
+      "category": "Steam",
+      "description": "Add funds to your Steam account",
+      "price": 50.0,
+      "stock": true
+    }
+  ]
 }
