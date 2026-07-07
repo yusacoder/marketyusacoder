@@ -63,6 +63,16 @@ function copyToClipboard(text) {
   }
 }
 
+function debounce(fn, delay) {
+  let timeoutId;
+  return function (...args) {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      fn.apply(this, args);
+    }, delay);
+  };
+}
+
 // ── Favorites (localStorage) ───────────────────────────────────────────────
 
 const Favorites = {
@@ -109,7 +119,11 @@ const Market = {
   async init() {
     try {
       const data = await fetchData();
-      this.allProducts = data.products || [];
+      this.allProducts = (data.products || []).map(p => ({
+        ...p,
+        // ⚡ Bolt: Pre-calculating search index to avoid expensive operations during filtering
+        _searchIndex: `${p.name} ${p.id} ${p.category} ${p.description}`.toLowerCase()
+      }));
       this.whatsapp = data.whatsapp || '';
       this.buildCategoryFilters();
       this.bindEvents();
@@ -147,6 +161,9 @@ const Market = {
       this.applyFilters();
     });
 
+    // ⚡ Bolt: Shared debounced function for search inputs to reduce filtering frequency
+    const debouncedApply = debounce(() => this.applyFilters(), 300);
+
     // Search (desktop)
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
@@ -155,7 +172,7 @@ const Market = {
         const mob = document.getElementById('searchInputMobile');
         if (mob) mob.value = searchInput.value;
         this.currentPage = 1;
-        this.applyFilters();
+        debouncedApply();
       });
     }
 
@@ -167,7 +184,7 @@ const Market = {
         const desk = document.getElementById('searchInput');
         if (desk) desk.value = mobileSearch.value;
         this.currentPage = 1;
-        this.applyFilters();
+        debouncedApply();
       });
     }
 
@@ -221,12 +238,8 @@ const Market = {
 
     // Search
     if (this.searchQuery) {
-      products = products.filter(p =>
-        p.name.toLowerCase().includes(this.searchQuery) ||
-        p.id.toLowerCase().includes(this.searchQuery) ||
-        p.category.toLowerCase().includes(this.searchQuery) ||
-        p.description.toLowerCase().includes(this.searchQuery)
-      );
+      // ⚡ Bolt: Using pre-calculated search index for faster filtering (O(n) string search vs O(n*k) lowercasing)
+      products = products.filter(p => p._searchIndex.includes(this.searchQuery));
     }
 
     // Sort
