@@ -63,6 +63,18 @@ function copyToClipboard(text) {
   }
 }
 
+/**
+ * ⚡ Bolt: Debounce function to limit the rate at which a function can fire.
+ * Useful for performance-heavy operations like filtering on every keystroke.
+ */
+function debounce(fn, delay) {
+  let timeoutId;
+  return function(...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 // ── Favorites (localStorage) ───────────────────────────────────────────────
 
 const Favorites = {
@@ -110,6 +122,12 @@ const Market = {
     try {
       const data = await fetchData();
       this.allProducts = data.products || [];
+
+      // ⚡ Bolt: Pre-calculate search index to avoid expensive string operations during filtering.
+      this.allProducts.forEach(p => {
+        p._searchIndex = `${p.name} ${p.id} ${p.category} ${p.description}`.toLowerCase();
+      });
+
       this.whatsapp = data.whatsapp || '';
       this.buildCategoryFilters();
       this.bindEvents();
@@ -136,6 +154,9 @@ const Market = {
   },
 
   bindEvents() {
+    // ⚡ Bolt: Debounced version of applyFilters for search inputs to prevent excessive re-renders.
+    const debouncedApplyFilters = debounce(() => this.applyFilters(), 300);
+
     // Category buttons
     document.getElementById('categoryFilters').addEventListener('click', e => {
       const btn = e.target.closest('.cat-btn');
@@ -155,7 +176,7 @@ const Market = {
         const mob = document.getElementById('searchInputMobile');
         if (mob) mob.value = searchInput.value;
         this.currentPage = 1;
-        this.applyFilters();
+        debouncedApplyFilters();
       });
     }
 
@@ -167,7 +188,7 @@ const Market = {
         const desk = document.getElementById('searchInput');
         if (desk) desk.value = mobileSearch.value;
         this.currentPage = 1;
-        this.applyFilters();
+        debouncedApplyFilters();
       });
     }
 
@@ -221,12 +242,8 @@ const Market = {
 
     // Search
     if (this.searchQuery) {
-      products = products.filter(p =>
-        p.name.toLowerCase().includes(this.searchQuery) ||
-        p.id.toLowerCase().includes(this.searchQuery) ||
-        p.category.toLowerCase().includes(this.searchQuery) ||
-        p.description.toLowerCase().includes(this.searchQuery)
-      );
+      // ⚡ Bolt: Using pre-calculated _searchIndex for faster filtering.
+      products = products.filter(p => p._searchIndex.includes(this.searchQuery));
     }
 
     // Sort
