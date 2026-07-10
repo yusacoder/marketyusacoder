@@ -63,24 +63,55 @@ function copyToClipboard(text) {
   }
 }
 
+// ⚡ Bolt: Generic debounce helper to rate-limit expensive operations
+function debounce(fn, delay) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 // ── Favorites (localStorage) ───────────────────────────────────────────────
 
 const Favorites = {
   KEY: 'gm_favorites',
+  _cache: null,
+
+  // ⚡ Bolt: Cache favorites in a Set to avoid repeated JSON.parse and enable O(1) lookups
+  _init() {
+    if (this._cache) return;
+    try {
+      const data = JSON.parse(localStorage.getItem(this.KEY));
+      this._cache = new Set(Array.isArray(data) ? data : []);
+    } catch {
+      this._cache = new Set();
+    }
+  },
+
   get() {
-    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
-    catch { return []; }
+    this._init();
+    return Array.from(this._cache);
   },
-  has(id) { return this.get().includes(id); },
+
+  has(id) {
+    this._init();
+    return this._cache.has(id);
+  },
+
   toggle(id) {
-    const favs = this.get();
-    const idx = favs.indexOf(id);
-    if (idx === -1) favs.push(id);
-    else favs.splice(idx, 1);
-    localStorage.setItem(this.KEY, JSON.stringify(favs));
-    return idx === -1; // true = added
+    this._init();
+    const isAdding = !this._cache.has(id);
+    if (isAdding) this._cache.add(id);
+    else this._cache.delete(id);
+    localStorage.setItem(this.KEY, JSON.stringify(Array.from(this._cache)));
+    return isAdding;
   },
-  count() { return this.get().length; }
+
+  count() {
+    this._init();
+    return this._cache.size;
+  }
 };
 
 // ── Data fetcher ────────────────────────────────────────────────────────────
@@ -149,25 +180,27 @@ const Market = {
 
     // Search (desktop)
     const searchInput = document.getElementById('searchInput');
+    const mobileSearch = document.getElementById('searchInputMobile');
+
+    // ⚡ Bolt: Debounce filtering to avoid layout thrashing and expensive DOM updates on every keystroke
+    const debouncedApplyFilters = debounce(() => this.applyFilters(), 300);
+
     if (searchInput) {
       searchInput.addEventListener('input', () => {
         this.searchQuery = searchInput.value.trim().toLowerCase();
-        const mob = document.getElementById('searchInputMobile');
-        if (mob) mob.value = searchInput.value;
+        if (mobileSearch) mobileSearch.value = searchInput.value;
         this.currentPage = 1;
-        this.applyFilters();
+        debouncedApplyFilters();
       });
     }
 
     // Search (mobile)
-    const mobileSearch = document.getElementById('searchInputMobile');
     if (mobileSearch) {
       mobileSearch.addEventListener('input', () => {
         this.searchQuery = mobileSearch.value.trim().toLowerCase();
-        const desk = document.getElementById('searchInput');
-        if (desk) desk.value = mobileSearch.value;
+        if (searchInput) searchInput.value = mobileSearch.value;
         this.currentPage = 1;
-        this.applyFilters();
+        debouncedApplyFilters();
       });
     }
 
