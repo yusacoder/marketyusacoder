@@ -63,6 +63,17 @@ function copyToClipboard(text) {
   }
 }
 
+/**
+ * ⚡ Bolt: Utility to rate-limit execution of performance-intensive operations
+ */
+function debounce(fn, delay) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 // ── Favorites (localStorage) ───────────────────────────────────────────────
 
 const Favorites = {
@@ -112,6 +123,10 @@ const Market = {
       this.allProducts = data.products || [];
       this.whatsapp = data.whatsapp || '';
       this.buildCategoryFilters();
+
+      // ⚡ Bolt: Debounce search to prevent excessive DOM re-renders during typing
+      this.debouncedApplyFilters = debounce(() => this.applyFilters(), 300);
+
       this.bindEvents();
       this.applyFilters();
       this.updateFavCount();
@@ -155,7 +170,8 @@ const Market = {
         const mob = document.getElementById('searchInputMobile');
         if (mob) mob.value = searchInput.value;
         this.currentPage = 1;
-        this.applyFilters();
+        // ⚡ Bolt: Use debounced version for filtering
+        this.debouncedApplyFilters();
       });
     }
 
@@ -167,7 +183,8 @@ const Market = {
         const desk = document.getElementById('searchInput');
         if (desk) desk.value = mobileSearch.value;
         this.currentPage = 1;
-        this.applyFilters();
+        // ⚡ Bolt: Use debounced version for filtering
+        this.debouncedApplyFilters();
       });
     }
 
