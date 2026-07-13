@@ -26,6 +26,14 @@ const CAT_EMOJIS = {
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
+function debounce(fn, delay) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 function formatPrice(price) {
   return price.toFixed(2).replace('.', ',') + ' ₺';
 }
@@ -111,6 +119,7 @@ const Market = {
       const data = await fetchData();
       this.allProducts = data.products || [];
       this.whatsapp = data.whatsapp || '';
+      this.debouncedApplyFilters = debounce(this.applyFilters.bind(this), 300);
       this.buildCategoryFilters();
       this.bindEvents();
       this.applyFilters();
@@ -155,7 +164,7 @@ const Market = {
         const mob = document.getElementById('searchInputMobile');
         if (mob) mob.value = searchInput.value;
         this.currentPage = 1;
-        this.applyFilters();
+        this.debouncedApplyFilters();
       });
     }
 
@@ -167,7 +176,7 @@ const Market = {
         const desk = document.getElementById('searchInput');
         if (desk) desk.value = mobileSearch.value;
         this.currentPage = 1;
-        this.applyFilters();
+        this.debouncedApplyFilters();
       });
     }
 
@@ -206,6 +215,7 @@ const Market = {
   },
 
   applyFilters() {
+    // ⚡ Bolt: Debounced filtering to improve performance
     let products = [...this.allProducts];
 
     // Favs view
