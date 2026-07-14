@@ -34,6 +34,17 @@ function getCatColor(cat) {
   return CAT_COLORS[cat] || '#e94560';
 }
 
+// ⚡ Bolt: Debounce helper to prevent excessive function execution during high-frequency events
+function debounce(fn, delay) {
+  let timeoutId;
+  return function(...args) {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      fn.apply(this, args);
+    }, delay);
+  };
+}
+
 function toast(msg, type = 'success', duration = 2500) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
@@ -111,6 +122,10 @@ const Market = {
       const data = await fetchData();
       this.allProducts = data.products || [];
       this.whatsapp = data.whatsapp || '';
+
+      // ⚡ Bolt: Create debounced version of applyFilters for search
+      this.debouncedApplyFilters = debounce(this.applyFilters.bind(this), 300);
+
       this.buildCategoryFilters();
       this.bindEvents();
       this.applyFilters();
@@ -155,7 +170,8 @@ const Market = {
         const mob = document.getElementById('searchInputMobile');
         if (mob) mob.value = searchInput.value;
         this.currentPage = 1;
-        this.applyFilters();
+        // ⚡ Bolt: Reduces re-renders and filtering overhead by debouncing search input (300ms)
+        this.debouncedApplyFilters();
       });
     }
 
@@ -167,7 +183,8 @@ const Market = {
         const desk = document.getElementById('searchInput');
         if (desk) desk.value = mobileSearch.value;
         this.currentPage = 1;
-        this.applyFilters();
+        // ⚡ Bolt: Reduces re-renders and filtering overhead by debouncing search input (300ms)
+        this.debouncedApplyFilters();
       });
     }
 
