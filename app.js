@@ -63,6 +63,18 @@ function copyToClipboard(text) {
   }
 }
 
+/**
+ * ⚡ Bolt: Debounce function to rate-limit execution.
+ * Prevents excessive calls to expensive functions like applyFilters.
+ */
+function debounce(fn, delay) {
+  let timeoutId;
+  return function(...args) {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 // ── Favorites (localStorage) ───────────────────────────────────────────────
 
 const Favorites = {
@@ -136,6 +148,9 @@ const Market = {
   },
 
   bindEvents() {
+    // ⚡ Bolt: Debounce applyFilters to improve responsiveness during typing
+    const debouncedApplyFilters = debounce(() => this.applyFilters(), 300);
+
     // Category buttons
     document.getElementById('categoryFilters').addEventListener('click', e => {
       const btn = e.target.closest('.cat-btn');
@@ -155,7 +170,7 @@ const Market = {
         const mob = document.getElementById('searchInputMobile');
         if (mob) mob.value = searchInput.value;
         this.currentPage = 1;
-        this.applyFilters();
+        debouncedApplyFilters();
       });
     }
 
@@ -167,7 +182,7 @@ const Market = {
         const desk = document.getElementById('searchInput');
         if (desk) desk.value = mobileSearch.value;
         this.currentPage = 1;
-        this.applyFilters();
+        debouncedApplyFilters();
       });
     }
 
