@@ -63,24 +63,58 @@ function copyToClipboard(text) {
   }
 }
 
-// ── Favorites (localStorage) ───────────────────────────────────────────────
+// ── Favorites (localStorage with in-memory cache) ──────────────────────────
 
 const Favorites = {
   KEY: 'gm_favorites',
+  _cache: null,
+
+  // ⚡ Bolt: Lazily load favorites from localStorage and cache them in a Set
+  // to avoid redundant JSON parsing and localStorage reads.
+  _init() {
+    if (this._cache !== null) return;
+    try {
+      const arr = JSON.parse(localStorage.getItem(this.KEY));
+      this._cache = new Set(Array.isArray(arr) ? arr : []);
+    } catch {
+      this._cache = new Set();
+    }
+  },
+
   get() {
-    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
-    catch { return []; }
+    this._init();
+    return Array.from(this._cache);
   },
-  has(id) { return this.get().includes(id); },
+
+  // ⚡ Bolt: O(1) cache lookup prevents performance overhead in loops (e.g. card rendering)
+  has(id) {
+    this._init();
+    return this._cache.has(id);
+  },
+
+  // ⚡ Bolt: Perform efficient in-memory toggle and update localStorage
   toggle(id) {
-    const favs = this.get();
-    const idx = favs.indexOf(id);
-    if (idx === -1) favs.push(id);
-    else favs.splice(idx, 1);
-    localStorage.setItem(this.KEY, JSON.stringify(favs));
-    return idx === -1; // true = added
+    this._init();
+    let added = false;
+    if (this._cache.has(id)) {
+      this._cache.delete(id);
+    } else {
+      this._cache.add(id);
+      added = true;
+    }
+    try {
+      localStorage.setItem(this.KEY, JSON.stringify(Array.from(this._cache)));
+    } catch (e) {
+      // Fail-safe for private/incognito mode localStorage errors
+    }
+    return added;
   },
-  count() { return this.get().length; }
+
+  // ⚡ Bolt: O(1) lookup size instead of full JSON parsing
+  count() {
+    this._init();
+    return this._cache.size;
+  }
 };
 
 // ── Data fetcher ────────────────────────────────────────────────────────────
@@ -209,9 +243,9 @@ const Market = {
     let products = [...this.allProducts];
 
     // Favs view
+    // ⚡ Bolt: Use O(1) in-memory Set cache lookup to filter favorites extremely fast
     if (this.showFavs) {
-      const favIds = Favorites.get();
-      products = products.filter(p => favIds.includes(p.id));
+      products = products.filter(p => Favorites.has(p.id));
     }
 
     // Category
