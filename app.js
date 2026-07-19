@@ -65,22 +65,53 @@ function copyToClipboard(text) {
 
 // ── Favorites (localStorage) ───────────────────────────────────────────────
 
+// ⚡ Bolt: In-memory Set-based cache for O(1) lookups and deferred JSON.parse of localStorage
 const Favorites = {
   KEY: 'gm_favorites',
+  _cache: null,
+
+  _init() {
+    if (this._cache !== null) return;
+    try {
+      const stored = localStorage.getItem(this.KEY);
+      const parsed = stored ? JSON.parse(stored) : [];
+      this._cache = new Set(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      this._cache = new Set();
+    }
+  },
+
   get() {
-    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
-    catch { return []; }
+    this._init();
+    return Array.from(this._cache);
   },
-  has(id) { return this.get().includes(id); },
+
+  has(id) {
+    this._init();
+    return this._cache.has(id);
+  },
+
   toggle(id) {
-    const favs = this.get();
-    const idx = favs.indexOf(id);
-    if (idx === -1) favs.push(id);
-    else favs.splice(idx, 1);
-    localStorage.setItem(this.KEY, JSON.stringify(favs));
-    return idx === -1; // true = added
+    this._init();
+    let added = false;
+    if (this._cache.has(id)) {
+      this._cache.delete(id);
+    } else {
+      this._cache.add(id);
+      added = true;
+    }
+    try {
+      localStorage.setItem(this.KEY, JSON.stringify(Array.from(this._cache)));
+    } catch (e) {
+      // Avoid throwing on write failure
+    }
+    return added;
   },
-  count() { return this.get().length; }
+
+  count() {
+    this._init();
+    return this._cache.size;
+  }
 };
 
 // ── Data fetcher ────────────────────────────────────────────────────────────
@@ -210,8 +241,7 @@ const Market = {
 
     // Favs view
     if (this.showFavs) {
-      const favIds = Favorites.get();
-      products = products.filter(p => favIds.includes(p.id));
+      products = products.filter(p => Favorites.has(p.id));
     }
 
     // Category
