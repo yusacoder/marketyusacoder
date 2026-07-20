@@ -65,22 +65,48 @@ function copyToClipboard(text) {
 
 // ── Favorites (localStorage) ───────────────────────────────────────────────
 
+/* ⚡ Bolt: Optimizing Favorites with a Set-based in-memory cache to achieve O(1) lookups
+   and eliminate redundant localStorage reads and JSON.parse() during layout and filtering. */
 const Favorites = {
   KEY: 'gm_favorites',
+  _cache: null,
+
+  _initCache() {
+    if (this._cache !== null) return;
+    try {
+      const arr = JSON.parse(localStorage.getItem(this.KEY));
+      this._cache = new Set(Array.isArray(arr) ? arr : []);
+    } catch {
+      this._cache = new Set();
+    }
+  },
+
   get() {
-    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
-    catch { return []; }
+    this._initCache();
+    return Array.from(this._cache);
   },
-  has(id) { return this.get().includes(id); },
+
+  has(id) {
+    this._initCache();
+    return this._cache.has(id);
+  },
+
   toggle(id) {
-    const favs = this.get();
-    const idx = favs.indexOf(id);
-    if (idx === -1) favs.push(id);
-    else favs.splice(idx, 1);
-    localStorage.setItem(this.KEY, JSON.stringify(favs));
-    return idx === -1; // true = added
+    this._initCache();
+    const existed = this._cache.has(id);
+    if (existed) {
+      this._cache.delete(id);
+    } else {
+      this._cache.add(id);
+    }
+    localStorage.setItem(this.KEY, JSON.stringify(Array.from(this._cache)));
+    return !existed; // true = added
   },
-  count() { return this.get().length; }
+
+  count() {
+    this._initCache();
+    return this._cache.size;
+  }
 };
 
 // ── Data fetcher ────────────────────────────────────────────────────────────
@@ -210,8 +236,8 @@ const Market = {
 
     // Favs view
     if (this.showFavs) {
-      const favIds = Favorites.get();
-      products = products.filter(p => favIds.includes(p.id));
+      /* ⚡ Bolt: Utilizing the O(1) Favorites.has() lookup to avoid redundant array scanning */
+      products = products.filter(p => Favorites.has(p.id));
     }
 
     // Category
