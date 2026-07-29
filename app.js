@@ -67,20 +67,46 @@ function copyToClipboard(text) {
 
 const Favorites = {
   KEY: 'gm_favorites',
+  // ⚡ Bolt: Use an in-memory Set cache to achieve O(1) lookups and eliminate
+  // redundant localStorage parsing and array scanning (includes/indexOf) on every render loop.
+  _cache: null,
+  _init() {
+    if (this._cache) return;
+    try {
+      const stored = JSON.parse(localStorage.getItem(this.KEY));
+      this._cache = new Set(Array.isArray(stored) ? stored : []);
+    } catch {
+      this._cache = new Set();
+    }
+  },
   get() {
-    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
-    catch { return []; }
+    this._init();
+    return Array.from(this._cache);
   },
-  has(id) { return this.get().includes(id); },
+  has(id) {
+    this._init();
+    return this._cache.has(id);
+  },
   toggle(id) {
-    const favs = this.get();
-    const idx = favs.indexOf(id);
-    if (idx === -1) favs.push(id);
-    else favs.splice(idx, 1);
-    localStorage.setItem(this.KEY, JSON.stringify(favs));
-    return idx === -1; // true = added
+    this._init();
+    let added = false;
+    if (this._cache.has(id)) {
+      this._cache.delete(id);
+    } else {
+      this._cache.add(id);
+      added = true;
+    }
+    try {
+      localStorage.setItem(this.KEY, JSON.stringify(Array.from(this._cache)));
+    } catch (e) {
+      // Handle storage quota or other issues gracefully
+    }
+    return added; // true = added
   },
-  count() { return this.get().length; }
+  count() {
+    this._init();
+    return this._cache.size;
+  }
 };
 
 // ── Data fetcher ────────────────────────────────────────────────────────────
