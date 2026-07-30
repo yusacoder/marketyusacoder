@@ -64,23 +64,54 @@ function copyToClipboard(text) {
 }
 
 // ── Favorites (localStorage) ───────────────────────────────────────────────
+// ⚡ Bolt: Optimized with an in-memory Set cache (`this._cache`) that lazily
+// loads favorites from `localStorage` ('gm_favorites') on first access,
+// providing O(1) lookups and eliminating redundant JSON parsing during rendering and filtering.
 
 const Favorites = {
   KEY: 'gm_favorites',
+  _cache: null,
+
+  _lazyInit() {
+    if (this._cache !== null) return;
+    try {
+      const arr = JSON.parse(localStorage.getItem(this.KEY)) || [];
+      this._cache = new Set(arr);
+    } catch {
+      this._cache = new Set();
+    }
+  },
+
   get() {
-    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
-    catch { return []; }
+    this._lazyInit();
+    return Array.from(this._cache);
   },
-  has(id) { return this.get().includes(id); },
+
+  has(id) {
+    this._lazyInit();
+    return this._cache.has(id);
+  },
+
   toggle(id) {
-    const favs = this.get();
-    const idx = favs.indexOf(id);
-    if (idx === -1) favs.push(id);
-    else favs.splice(idx, 1);
-    localStorage.setItem(this.KEY, JSON.stringify(favs));
-    return idx === -1; // true = added
+    this._lazyInit();
+    const hasItem = this._cache.has(id);
+    if (hasItem) {
+      this._cache.delete(id);
+    } else {
+      this._cache.add(id);
+    }
+    try {
+      localStorage.setItem(this.KEY, JSON.stringify(Array.from(this._cache)));
+    } catch {
+      // Ignore storage errors gracefully
+    }
+    return !hasItem; // true = added
   },
-  count() { return this.get().length; }
+
+  count() {
+    this._lazyInit();
+    return this._cache.size;
+  }
 };
 
 // ── Data fetcher ────────────────────────────────────────────────────────────
@@ -209,9 +240,9 @@ const Market = {
     let products = [...this.allProducts];
 
     // Favs view
+    // ⚡ Bolt: Using Favorites.has(p.id) is O(1) and avoids redundant JSON.parse calls and O(N) includes searches.
     if (this.showFavs) {
-      const favIds = Favorites.get();
-      products = products.filter(p => favIds.includes(p.id));
+      products = products.filter(p => Favorites.has(p.id));
     }
 
     // Category
