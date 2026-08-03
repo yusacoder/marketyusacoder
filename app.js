@@ -67,20 +67,49 @@ function copyToClipboard(text) {
 
 const Favorites = {
   KEY: 'gm_favorites',
+  _cache: null, // ⚡ Bolt: Lazy-loaded Set for O(1) in-memory checks
+
+  _init() {
+    if (this._cache) return;
+    try {
+      const stored = JSON.parse(localStorage.getItem(this.KEY)) || [];
+      this._cache = new Set(stored);
+    } catch {
+      this._cache = new Set();
+    }
+  },
+
   get() {
-    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
-    catch { return []; }
+    this._init();
+    // ⚡ Bolt: Return copy of array from cache for safety
+    return Array.from(this._cache);
   },
-  has(id) { return this.get().includes(id); },
+
+  has(id) {
+    this._init();
+    // ⚡ Bolt: O(1) Set lookup instead of parsing and doing Array.includes
+    return this._cache.has(id);
+  },
+
   toggle(id) {
-    const favs = this.get();
-    const idx = favs.indexOf(id);
-    if (idx === -1) favs.push(id);
-    else favs.splice(idx, 1);
-    localStorage.setItem(this.KEY, JSON.stringify(favs));
-    return idx === -1; // true = added
+    this._init();
+    let added = false;
+    if (this._cache.has(id)) {
+      this._cache.delete(id);
+    } else {
+      this._cache.add(id);
+      added = true;
+    }
+    // ⚡ Bolt: Save Set as Array in localStorage
+    localStorage.setItem(this.KEY, JSON.stringify(Array.from(this._cache)));
+    return added; // true = added
   },
-  count() { return this.get().length; }
+
+  count() {
+    this._init();
+    // ⚡ Bolt: Set size check is O(1)
+    return this._cache.size;
+  }
 };
 
 // ── Data fetcher ────────────────────────────────────────────────────────────
