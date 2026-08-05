@@ -67,20 +67,51 @@ function copyToClipboard(text) {
 
 const Favorites = {
   KEY: 'gm_favorites',
+  // ⚡ Bolt: In-memory cache using Set to eliminate redundant JSON parsing of localStorage and O(N) array lookups.
+  _cache: null,
+
+  _initCache() {
+    if (this._cache !== null) return;
+    try {
+      const stored = JSON.parse(localStorage.getItem(this.KEY));
+      this._cache = new Set(Array.isArray(stored) ? stored : []);
+    } catch {
+      this._cache = new Set();
+    }
+  },
+
   get() {
-    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
-    catch { return []; }
+    this._initCache();
+    return Array.from(this._cache);
   },
-  has(id) { return this.get().includes(id); },
+
+  has(id) {
+    this._initCache();
+    // ⚡ Bolt: O(1) Set lookup instead of parsing and scanning an array.
+    return this._cache.has(id);
+  },
+
   toggle(id) {
-    const favs = this.get();
-    const idx = favs.indexOf(id);
-    if (idx === -1) favs.push(id);
-    else favs.splice(idx, 1);
-    localStorage.setItem(this.KEY, JSON.stringify(favs));
-    return idx === -1; // true = added
+    this._initCache();
+    const added = !this._cache.has(id);
+    if (added) {
+      this._cache.add(id);
+    } else {
+      this._cache.delete(id);
+    }
+    try {
+      localStorage.setItem(this.KEY, JSON.stringify(Array.from(this._cache)));
+    } catch (e) {
+      // Gracefully handle potential Storage quotas/errors
+    }
+    return added;
   },
-  count() { return this.get().length; }
+
+  count() {
+    this._initCache();
+    // ⚡ Bolt: O(1) count.
+    return this._cache.size;
+  }
 };
 
 // ── Data fetcher ────────────────────────────────────────────────────────────
@@ -210,8 +241,8 @@ const Market = {
 
     // Favs view
     if (this.showFavs) {
-      const favIds = Favorites.get();
-      products = products.filter(p => favIds.includes(p.id));
+      // ⚡ Bolt: Use Favorites.has(p.id) which performs O(1) in-memory Set lookup.
+      products = products.filter(p => Favorites.has(p.id));
     }
 
     // Category
