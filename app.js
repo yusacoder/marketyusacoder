@@ -63,24 +63,55 @@ function copyToClipboard(text) {
   }
 }
 
-// ── Favorites (localStorage) ───────────────────────────────────────────────
+// ── Favorites (localStorage & Set Cache) ───────────────────────────────────
+// ⚡ Bolt: Optimizes lookup times from O(N) to O(1) and eliminates redundant
+// JSON parsing and localStorage reads by introducing a lazy-loaded Set cache.
 
 const Favorites = {
   KEY: 'gm_favorites',
+  _cache: null,
+
+  // Lazy initialize the cache from localStorage exactly once per page load
+  _init() {
+    if (this._cache !== null) return;
+    try {
+      const stored = JSON.parse(localStorage.getItem(this.KEY));
+      this._cache = new Set(Array.isArray(stored) ? stored : []);
+    } catch {
+      this._cache = new Set();
+    }
+  },
+
   get() {
-    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
-    catch { return []; }
+    this._init();
+    return Array.from(this._cache);
   },
-  has(id) { return this.get().includes(id); },
+
+  has(id) {
+    this._init();
+    return this._cache.has(id);
+  },
+
   toggle(id) {
-    const favs = this.get();
-    const idx = favs.indexOf(id);
-    if (idx === -1) favs.push(id);
-    else favs.splice(idx, 1);
-    localStorage.setItem(this.KEY, JSON.stringify(favs));
-    return idx === -1; // true = added
+    this._init();
+    const added = !this._cache.has(id);
+    if (added) {
+      this._cache.add(id);
+    } else {
+      this._cache.delete(id);
+    }
+    try {
+      localStorage.setItem(this.KEY, JSON.stringify(Array.from(this._cache)));
+    } catch (e) {
+      console.error('Favorites could not be saved:', e);
+    }
+    return added;
   },
-  count() { return this.get().length; }
+
+  count() {
+    this._init();
+    return this._cache.size;
+  }
 };
 
 // ── Data fetcher ────────────────────────────────────────────────────────────
@@ -210,8 +241,8 @@ const Market = {
 
     // Favs view
     if (this.showFavs) {
-      const favIds = Favorites.get();
-      products = products.filter(p => favIds.includes(p.id));
+      // ⚡ Bolt: Uses O(1) Set.has lookup directly instead of O(N) Array.includes
+      products = products.filter(p => Favorites.has(p.id));
     }
 
     // Category
