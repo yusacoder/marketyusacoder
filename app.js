@@ -67,20 +67,50 @@ function copyToClipboard(text) {
 
 const Favorites = {
   KEY: 'gm_favorites',
+  // ⚡ Bolt: Use an in-memory Set cache to avoid repeated expensive localStorage reads & JSON parsing.
+  // This reduces lookup overhead from O(N) to O(1) and boosts performance significantly.
+  _cache: null,
+
+  _init() {
+    if (this._cache) return;
+    try {
+      const arr = JSON.parse(localStorage.getItem(this.KEY)) || [];
+      this._cache = new Set(arr);
+    } catch {
+      this._cache = new Set();
+    }
+  },
+
   get() {
-    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
-    catch { return []; }
+    this._init();
+    return Array.from(this._cache);
   },
-  has(id) { return this.get().includes(id); },
+
+  has(id) {
+    this._init();
+    return this._cache.has(id);
+  },
+
   toggle(id) {
-    const favs = this.get();
-    const idx = favs.indexOf(id);
-    if (idx === -1) favs.push(id);
-    else favs.splice(idx, 1);
-    localStorage.setItem(this.KEY, JSON.stringify(favs));
-    return idx === -1; // true = added
+    this._init();
+    const added = !this._cache.has(id);
+    if (added) {
+      this._cache.add(id);
+    } else {
+      this._cache.delete(id);
+    }
+    try {
+      localStorage.setItem(this.KEY, JSON.stringify(Array.from(this._cache)));
+    } catch (e) {
+      // Gracefully handle potential QuotaExceededError or restricted access
+    }
+    return added; // true = added
   },
-  count() { return this.get().length; }
+
+  count() {
+    this._init();
+    return this._cache.size;
+  }
 };
 
 // ── Data fetcher ────────────────────────────────────────────────────────────
