@@ -65,22 +65,49 @@ function copyToClipboard(text) {
 
 // ── Favorites (localStorage) ───────────────────────────────────────────────
 
+// ⚡ Bolt: Implemented an in-memory Set cache for favorites to eliminate O(N^2)/O(N)
+// localStorage accesses and JSON parsing during rendering and filtering.
+// This reduces lookup complexity to O(1) and boosts rendering speed significantly.
 const Favorites = {
   KEY: 'gm_favorites',
+  _cache: null,
+
+  _init() {
+    if (this._cache !== null) return;
+    try {
+      const arr = JSON.parse(localStorage.getItem(this.KEY)) || [];
+      this._cache = new Set(arr);
+    } catch {
+      this._cache = new Set();
+    }
+  },
+
   get() {
-    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
-    catch { return []; }
+    this._init();
+    return Array.from(this._cache);
   },
-  has(id) { return this.get().includes(id); },
+
+  has(id) {
+    this._init();
+    return this._cache.has(id);
+  },
+
   toggle(id) {
-    const favs = this.get();
-    const idx = favs.indexOf(id);
-    if (idx === -1) favs.push(id);
-    else favs.splice(idx, 1);
-    localStorage.setItem(this.KEY, JSON.stringify(favs));
-    return idx === -1; // true = added
+    this._init();
+    const added = !this._cache.has(id);
+    if (added) {
+      this._cache.add(id);
+    } else {
+      this._cache.delete(id);
+    }
+    localStorage.setItem(this.KEY, JSON.stringify(Array.from(this._cache)));
+    return added;
   },
-  count() { return this.get().length; }
+
+  count() {
+    this._init();
+    return this._cache.size;
+  }
 };
 
 // ── Data fetcher ────────────────────────────────────────────────────────────
