@@ -67,20 +67,52 @@ function copyToClipboard(text) {
 
 const Favorites = {
   KEY: 'gm_favorites',
+  _cache: null,
+
+  _init() {
+    if (this._cache !== null) return;
+    try {
+      const stored = JSON.parse(localStorage.getItem(this.KEY));
+      this._cache = new Set(Array.isArray(stored) ? stored : []);
+    } catch {
+      this._cache = new Set();
+    }
+  },
+
   get() {
-    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
-    catch { return []; }
+    this._init();
+    // ⚡ Bolt: Return copy of favorites array from cache to prevent mutation
+    return Array.from(this._cache);
   },
-  has(id) { return this.get().includes(id); },
+
+  has(id) {
+    this._init();
+    // ⚡ Bolt: Fast O(1) lookup in memory instead of parsing JSON on every check
+    return this._cache.has(id);
+  },
+
   toggle(id) {
-    const favs = this.get();
-    const idx = favs.indexOf(id);
-    if (idx === -1) favs.push(id);
-    else favs.splice(idx, 1);
-    localStorage.setItem(this.KEY, JSON.stringify(favs));
-    return idx === -1; // true = added
+    this._init();
+    const added = !this._cache.has(id);
+    if (added) {
+      this._cache.add(id);
+    } else {
+      this._cache.delete(id);
+    }
+    // ⚡ Bolt: Persist cache back to localStorage
+    try {
+      localStorage.setItem(this.KEY, JSON.stringify(Array.from(this._cache)));
+    } catch (e) {
+      console.error('Failed to save favorites', e);
+    }
+    return added; // true = added
   },
-  count() { return this.get().length; }
+
+  count() {
+    this._init();
+    // ⚡ Bolt: Instant count using cache size
+    return this._cache.size;
+  }
 };
 
 // ── Data fetcher ────────────────────────────────────────────────────────────
