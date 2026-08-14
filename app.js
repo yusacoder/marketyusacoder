@@ -65,22 +65,30 @@ function copyToClipboard(text) {
 
 // ── Favorites (localStorage) ───────────────────────────────────────────────
 
+// ⚡ Bolt: Cached in-memory Set for O(1) lookups and avoiding redundant JSON.parse / localStorage reads
 const Favorites = {
   KEY: 'gm_favorites',
-  get() {
-    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
-    catch { return []; }
+  _cache: null,
+  _load() {
+    if (this._cache) return this._cache;
+    try {
+      const stored = JSON.parse(localStorage.getItem(this.KEY));
+      this._cache = new Set(Array.isArray(stored) ? stored : []);
+    } catch {
+      this._cache = new Set();
+    }
+    return this._cache;
   },
-  has(id) { return this.get().includes(id); },
+  get() { return Array.from(this._load()); },
+  has(id) { return this._load().has(id); },
   toggle(id) {
-    const favs = this.get();
-    const idx = favs.indexOf(id);
-    if (idx === -1) favs.push(id);
-    else favs.splice(idx, 1);
-    localStorage.setItem(this.KEY, JSON.stringify(favs));
-    return idx === -1; // true = added
+    const cache = this._load();
+    const added = !cache.has(id);
+    if (added) cache.add(id); else cache.delete(id);
+    localStorage.setItem(this.KEY, JSON.stringify(Array.from(cache)));
+    return added; // true = added
   },
-  count() { return this.get().length; }
+  count() { return this._load().size; }
 };
 
 // ── Data fetcher ────────────────────────────────────────────────────────────
