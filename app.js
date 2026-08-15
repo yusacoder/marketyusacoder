@@ -26,6 +26,15 @@ const CAT_EMOJIS = {
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
+// ⚡ Bolt: Debounce helper to limit execution frequency of rapid events (e.g. search input)
+function debounce(fn, wait = 250) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), wait);
+  };
+}
+
 function formatPrice(price) {
   return price.toFixed(2).replace('.', ',') + ' ₺';
 }
@@ -147,15 +156,20 @@ const Market = {
       this.applyFilters();
     });
 
+    // ⚡ Bolt: Debounce search input handling (250ms delay) to prevent excessive filtering and DOM updates on every keystroke
+    const handleSearchInput = debounce((value) => {
+      this.searchQuery = value.trim().toLowerCase();
+      this.currentPage = 1;
+      this.applyFilters();
+    }, 250);
+
     // Search (desktop)
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
       searchInput.addEventListener('input', () => {
-        this.searchQuery = searchInput.value.trim().toLowerCase();
         const mob = document.getElementById('searchInputMobile');
         if (mob) mob.value = searchInput.value;
-        this.currentPage = 1;
-        this.applyFilters();
+        handleSearchInput(searchInput.value);
       });
     }
 
@@ -163,11 +177,9 @@ const Market = {
     const mobileSearch = document.getElementById('searchInputMobile');
     if (mobileSearch) {
       mobileSearch.addEventListener('input', () => {
-        this.searchQuery = mobileSearch.value.trim().toLowerCase();
         const desk = document.getElementById('searchInput');
         if (desk) desk.value = mobileSearch.value;
-        this.currentPage = 1;
-        this.applyFilters();
+        handleSearchInput(mobileSearch.value);
       });
     }
 
