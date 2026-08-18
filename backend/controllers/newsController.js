@@ -18,9 +18,11 @@ exports.getHealth = (req, res) => {
 // GET /api/news
 exports.getAllNews = async (req, res) => {
   try {
+    // Bolt Optimization: Select only the necessary columns for news list views
+    // to exclude heavy columns like `content`, reducing network payload and memory usage.
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('id, title, slug, description, image_url, category, created_at')
       .eq('published', true)
       .order('created_at', { ascending: false });
 
@@ -59,9 +61,10 @@ exports.getNewsBySlug = async (req, res) => {
 exports.getNewsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
+    // Bolt Optimization: Select only necessary fields for category list view
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('id, title, slug, description, image_url, category, created_at')
       .ilike('category', category)
       .eq('published', true)
       .order('created_at', { ascending: false });
@@ -82,9 +85,10 @@ exports.searchNews = async (req, res) => {
     const { q } = req.query;
 
     if (!q || q.trim() === '') {
+      // Bolt Optimization: Select only necessary fields for default search list
       const { data, error } = await supabase
         .from('news')
-        .select('*')
+        .select('id, title, slug, description, image_url, category, created_at')
         .eq('published', true)
         .order('created_at', { ascending: false });
 
@@ -93,9 +97,10 @@ exports.searchNews = async (req, res) => {
     }
 
     const searchTerm = `%${q.trim()}%`;
+    // Bolt Optimization: Select only necessary fields for search results
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('id, title, slug, description, image_url, category, created_at')
       .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
       .eq('published', true)
       .order('created_at', { ascending: false });
