@@ -1,0 +1,3 @@
+## 2026-08-28 - Database Query Payload Optimization on News List Endpoints
+**Learning:** Returning full article body (`content` text column) in list views (`/api/news`, `/api/news/category/:category`, `/api/news/search`) adds unnecessary network payload size and memory allocation overhead. Selecting explicitly needed list attributes (`id, title, slug, description, image_url, category, author, created_at`) significantly improves API response time and reduces bandwidth consumption.
+**Action:** Always project only necessary columns for list/index queries when fetching model collections from Supabase / PostgreSQL.
