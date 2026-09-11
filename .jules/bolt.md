@@ -1,0 +1,3 @@
+## 2026-09-11 - Database Payload Reduction on List Endpoints
+**Learning:** Returning large `TEXT` columns (like full article `content`) on news listing endpoints (`getAllNews`, `getNewsByCategory`, `searchNews`) inflates SQL result size and network transfer payload significantly when only title, description, slug, and image metadata are rendered on card grids.
+**Action:** Always project specific required columns (`id, title, slug, description, image_url, category, created_at`) on list/search endpoints and reserve full column fetches (`*` or detail projections) for individual item endpoints (`getNewsBySlug`).
