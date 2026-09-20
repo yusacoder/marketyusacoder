@@ -111,6 +111,9 @@ exports.searchNews = async (req, res) => {
 };
 
 // GET /api/categories
+// Optimization: Categories list is static, set Cache-Control headers to allow
+// client-side and CDN caching for 24 hours (86400 seconds) to save bandwidth and redundant server requests.
 exports.getCategories = (req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
   res.status(200).json(CATEGORIES);
 };
