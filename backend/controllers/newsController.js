@@ -15,12 +15,17 @@ exports.getHealth = (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 };
 
+// Columns required for news list/card display (excluding heavy 'content' column for performance)
+const NEWS_CARD_FIELDS = 'id, title, slug, description, image_url, category, created_at, published';
+
 // GET /api/news
 exports.getAllNews = async (req, res) => {
   try {
+    // Optimization: Select only card fields instead of select('*') to omit full article content
+    // and significantly reduce response payload size and database network overhead.
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_CARD_FIELDS)
       .eq('published', true)
       .order('created_at', { ascending: false });
 
@@ -59,9 +64,10 @@ exports.getNewsBySlug = async (req, res) => {
 exports.getNewsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
+    // Optimization: Select only card fields instead of select('*')
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_CARD_FIELDS)
       .ilike('category', category)
       .eq('published', true)
       .order('created_at', { ascending: false });
@@ -82,9 +88,10 @@ exports.searchNews = async (req, res) => {
     const { q } = req.query;
 
     if (!q || q.trim() === '') {
+      // Optimization: Select only card fields instead of select('*')
       const { data, error } = await supabase
         .from('news')
-        .select('*')
+        .select(NEWS_CARD_FIELDS)
         .eq('published', true)
         .order('created_at', { ascending: false });
 
@@ -93,9 +100,10 @@ exports.searchNews = async (req, res) => {
     }
 
     const searchTerm = `%${q.trim()}%`;
+    // Optimization: Select only card fields instead of select('*')
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_CARD_FIELDS)
       .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
       .eq('published', true)
       .order('created_at', { ascending: false });
