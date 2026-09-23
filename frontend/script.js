@@ -1,5 +1,8 @@
 const API_URL = "https://api.yusacoder.com";
 
+// Performance Optimization: Cache categories in memory to prevent duplicate API requests
+let categoriesCache = null;
+
 // Helper function to format date
 function formatDate(dateString) {
   if (!dateString) return "";
@@ -17,9 +20,13 @@ async function renderCategoriesNav(activeCategory = null) {
   if (!container) return;
 
   try {
-    const res = await fetch(`${API_URL}/api/categories`);
-    if (!res.ok) throw new Error("Kategoriler alınamadı.");
-    const categories = await res.json();
+    // Check if categories are already cached in memory
+    if (!categoriesCache) {
+      const res = await fetch(`${API_URL}/api/categories`);
+      if (!res.ok) throw new Error("Kategoriler alınamadı.");
+      categoriesCache = await res.json();
+    }
+    const categories = categoriesCache;
 
     let html = `<li><a href="index.html" class="nav-link ${!activeCategory ? 'active' : ''}">Tümü</a></li>`;
     categories.forEach(cat => {
