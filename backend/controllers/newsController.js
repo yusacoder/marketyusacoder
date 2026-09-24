@@ -111,6 +111,9 @@ exports.searchNews = async (req, res) => {
 };
 
 // GET /api/categories
+// Bolt ⚡ Optimization: Add Cache-Control header for static category list.
+// Categories rarely change, so caching for 1 day (86400s) on CDN/browser reduces redundant API calls and improves TTFB.
 exports.getCategories = (req, res) => {
+  res.set('Cache-Control', 'public, max-age=86400, stale-while-revalidate=3600');
   res.status(200).json(CATEGORIES);
 };
