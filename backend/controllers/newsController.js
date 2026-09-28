@@ -18,9 +18,10 @@ exports.getHealth = (req, res) => {
 // GET /api/news
 exports.getAllNews = async (req, res) => {
   try {
+    // Optimization: Exclude heavy 'content' column in list endpoint to reduce payload size and query latency
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('id, title, slug, description, image_url, category, created_at, author')
       .eq('published', true)
       .order('created_at', { ascending: false });
 
@@ -59,9 +60,10 @@ exports.getNewsBySlug = async (req, res) => {
 exports.getNewsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
+    // Optimization: Exclude heavy 'content' column in list endpoint to reduce payload size and query latency
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('id, title, slug, description, image_url, category, created_at, author')
       .ilike('category', category)
       .eq('published', true)
       .order('created_at', { ascending: false });
@@ -84,7 +86,7 @@ exports.searchNews = async (req, res) => {
     if (!q || q.trim() === '') {
       const { data, error } = await supabase
         .from('news')
-        .select('*')
+        .select('id, title, slug, description, image_url, category, created_at, author')
         .eq('published', true)
         .order('created_at', { ascending: false });
 
@@ -93,9 +95,10 @@ exports.searchNews = async (req, res) => {
     }
 
     const searchTerm = `%${q.trim()}%`;
+    // Optimization: Exclude heavy 'content' column in search results to reduce payload size and query latency
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('id, title, slug, description, image_url, category, created_at, author')
       .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
       .eq('published', true)
       .order('created_at', { ascending: false });
