@@ -10,6 +10,9 @@ const CATEGORIES = [
   "Anime"
 ];
 
+// Fields required for news card / listing display (omits heavy `content` text field)
+const NEWS_LIST_FIELDS = 'id, title, slug, description, image_url, category, author, created_at';
+
 // GET /api/health
 exports.getHealth = (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
@@ -18,9 +21,10 @@ exports.getHealth = (req, res) => {
 // GET /api/news
 exports.getAllNews = async (req, res) => {
   try {
+    // Optimization: Select only card metadata fields to reduce payload size and query overhead
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .eq('published', true)
       .order('created_at', { ascending: false });
 
@@ -59,9 +63,10 @@ exports.getNewsBySlug = async (req, res) => {
 exports.getNewsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
+    // Optimization: Select only card metadata fields to reduce payload size
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .ilike('category', category)
       .eq('published', true)
       .order('created_at', { ascending: false });
@@ -82,9 +87,10 @@ exports.searchNews = async (req, res) => {
     const { q } = req.query;
 
     if (!q || q.trim() === '') {
+      // Optimization: Select only card metadata fields to reduce payload size
       const { data, error } = await supabase
         .from('news')
-        .select('*')
+        .select(NEWS_LIST_FIELDS)
         .eq('published', true)
         .order('created_at', { ascending: false });
 
@@ -93,9 +99,10 @@ exports.searchNews = async (req, res) => {
     }
 
     const searchTerm = `%${q.trim()}%`;
+    // Optimization: Select only card metadata fields to reduce payload size
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
       .eq('published', true)
       .order('created_at', { ascending: false });
@@ -112,5 +119,7 @@ exports.searchNews = async (req, res) => {
 
 // GET /api/categories
 exports.getCategories = (req, res) => {
+  // Optimization: Add Cache-Control header for static category list
+  res.setHeader('Cache-Control', 'public, max-age=3600');
   res.status(200).json(CATEGORIES);
 };
