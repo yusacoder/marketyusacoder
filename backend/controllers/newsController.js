@@ -112,5 +112,8 @@ exports.searchNews = async (req, res) => {
 
 // GET /api/categories
 exports.getCategories = (req, res) => {
+  // Set Cache-Control header for static category list (1 hour browser cache, 24 hours CDN cache)
+  // Optimization: Reduces unnecessary API round-trips for non-frequently changing category navigation.
+  res.set('Cache-Control', 'public, max-age=3600, s-maxage=86400');
   res.status(200).json(CATEGORIES);
 };
