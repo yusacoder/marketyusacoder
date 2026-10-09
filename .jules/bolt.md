@@ -1,0 +1,3 @@
+## 2025-05-18 - DB Query Projection Optimization for Article Lists
+**Learning:** In full-stack applications with article/news lists, fetching full article text content (`select('*')`) on list endpoints transfers unnecessary data for every article. Explicit column projection (`select('id, title, slug, description, category, image_url, created_at')`) significantly reduces Supabase egress and payload sizes.
+**Action:** When querying collection endpoints in backend controllers, always specify only the columns required by list views and reserve full text/content fields for single-resource detail endpoints (`/api/news/:slug`).
