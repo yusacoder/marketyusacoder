@@ -18,9 +18,11 @@ exports.getHealth = (req, res) => {
 // GET /api/news
 exports.getAllNews = async (req, res) => {
   try {
+    // Optimization: Select only fields required for news list cards.
+    // Excluding heavy article 'content' significantly reduces DB egress and JSON payload size.
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('id, title, slug, description, category, image_url, created_at')
       .eq('published', true)
       .order('created_at', { ascending: false });
 
@@ -59,9 +61,11 @@ exports.getNewsBySlug = async (req, res) => {
 exports.getNewsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
+    // Optimization: Select only fields required for category news list.
+    // Excluding heavy 'content' field speeds up network payload transfer.
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('id, title, slug, description, category, image_url, created_at')
       .ilike('category', category)
       .eq('published', true)
       .order('created_at', { ascending: false });
@@ -81,10 +85,11 @@ exports.searchNews = async (req, res) => {
   try {
     const { q } = req.query;
 
+    // Optimization: Select only fields required for search results list cards.
     if (!q || q.trim() === '') {
       const { data, error } = await supabase
         .from('news')
-        .select('*')
+        .select('id, title, slug, description, category, image_url, created_at')
         .eq('published', true)
         .order('created_at', { ascending: false });
 
@@ -95,7 +100,7 @@ exports.searchNews = async (req, res) => {
     const searchTerm = `%${q.trim()}%`;
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('id, title, slug, description, category, image_url, created_at')
       .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
       .eq('published', true)
       .order('created_at', { ascending: false });
