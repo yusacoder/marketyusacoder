@@ -15,12 +15,16 @@ exports.getHealth = (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 };
 
+// Fields needed for news list views (excludes heavy 'content' column to reduce payload size and query overhead)
+const NEWS_LIST_FIELDS = 'id, title, slug, description, image_url, category, author, published, created_at, updated_at';
+
 // GET /api/news
 exports.getAllNews = async (req, res) => {
   try {
+    // ⚡ Bolt Optimization: Select explicit fields for list view instead of select('*') to omit heavy article content
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .eq('published', true)
       .order('created_at', { ascending: false });
 
@@ -59,9 +63,10 @@ exports.getNewsBySlug = async (req, res) => {
 exports.getNewsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
+    // ⚡ Bolt Optimization: Exclude heavy article 'content' column for category list view
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .ilike('category', category)
       .eq('published', true)
       .order('created_at', { ascending: false });
@@ -82,9 +87,10 @@ exports.searchNews = async (req, res) => {
     const { q } = req.query;
 
     if (!q || q.trim() === '') {
+      // ⚡ Bolt Optimization: Exclude heavy article 'content' column for empty query search list view
       const { data, error } = await supabase
         .from('news')
-        .select('*')
+        .select(NEWS_LIST_FIELDS)
         .eq('published', true)
         .order('created_at', { ascending: false });
 
@@ -93,9 +99,10 @@ exports.searchNews = async (req, res) => {
     }
 
     const searchTerm = `%${q.trim()}%`;
+    // ⚡ Bolt Optimization: Exclude heavy article 'content' column for search results list view
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
       .eq('published', true)
       .order('created_at', { ascending: false });
