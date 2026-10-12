@@ -15,12 +15,16 @@ exports.getHealth = (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 };
 
+// Specific columns required for listing views.
+// Excludes heavy 'content' column to reduce network payload size & DB memory overhead when querying multiple items.
+const NEWS_SUMMARY_FIELDS = 'id, title, slug, description, image_url, category, author, created_at, published';
+
 // GET /api/news
 exports.getAllNews = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_SUMMARY_FIELDS)
       .eq('published', true)
       .order('created_at', { ascending: false });
 
@@ -61,7 +65,7 @@ exports.getNewsByCategory = async (req, res) => {
     const { category } = req.params;
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_SUMMARY_FIELDS)
       .ilike('category', category)
       .eq('published', true)
       .order('created_at', { ascending: false });
@@ -84,7 +88,7 @@ exports.searchNews = async (req, res) => {
     if (!q || q.trim() === '') {
       const { data, error } = await supabase
         .from('news')
-        .select('*')
+        .select(NEWS_SUMMARY_FIELDS)
         .eq('published', true)
         .order('created_at', { ascending: false });
 
@@ -95,7 +99,7 @@ exports.searchNews = async (req, res) => {
     const searchTerm = `%${q.trim()}%`;
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_SUMMARY_FIELDS)
       .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
       .eq('published', true)
       .order('created_at', { ascending: false });
