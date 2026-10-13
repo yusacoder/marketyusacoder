@@ -17,9 +17,18 @@ async function renderCategoriesNav(activeCategory = null) {
   if (!container) return;
 
   try {
-    const res = await fetch(`${API_URL}/api/categories`);
-    if (!res.ok) throw new Error("Kategoriler alınamadı.");
-    const categories = await res.json();
+    // ⚡ Bolt: Cache categories in sessionStorage to avoid redundant network requests across page navigation
+    let categories;
+    const cachedCategories = sessionStorage.getItem("categories");
+
+    if (cachedCategories) {
+      categories = JSON.parse(cachedCategories);
+    } else {
+      const res = await fetch(`${API_URL}/api/categories`);
+      if (!res.ok) throw new Error("Kategoriler alınamadı.");
+      categories = await res.json();
+      sessionStorage.setItem("categories", JSON.stringify(categories));
+    }
 
     let html = `<li><a href="index.html" class="nav-link ${!activeCategory ? 'active' : ''}">Tümü</a></li>`;
     categories.forEach(cat => {

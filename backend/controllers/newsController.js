@@ -112,5 +112,7 @@ exports.searchNews = async (req, res) => {
 
 // GET /api/categories
 exports.getCategories = (req, res) => {
+  // ⚡ Bolt: Cache public categories response for 1 hour
+  res.setHeader("Cache-Control", "public, max-age=3600");
   res.status(200).json(CATEGORIES);
 };
