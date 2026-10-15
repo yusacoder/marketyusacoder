@@ -1,0 +1,3 @@
+## 2026-10-15 - Explicit Column Selection in Supabase List Queries
+**Learning:** Returning full article `content` text fields in list endpoints (`/api/news`, `/api/news/category/:category`, `/api/news/search`) bloats response payload size and degrades network throughput unnecessarily, as list cards only display titles, descriptions, categories, images, and dates.
+**Action:** Always restrict Supabase `.select()` queries on list endpoints to only the specific fields required by frontend list views (e.g., `id, title, slug, description, image_url, category, created_at`). Keep `.select('*')` or full detail fetching reserved for single-resource detail endpoints like `/api/news/:slug`.
