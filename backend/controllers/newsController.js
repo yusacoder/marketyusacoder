@@ -18,9 +18,11 @@ exports.getHealth = (req, res) => {
 // GET /api/news
 exports.getAllNews = async (req, res) => {
   try {
+    // ⚡ Bolt Optimization: Exclude heavy 'content' column in news list query
+    // to significantly reduce JSON payload size and network latency.
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('id, title, slug, description, image_url, category, author, published, created_at, updated_at')
       .eq('published', true)
       .order('created_at', { ascending: false });
 
@@ -59,9 +61,10 @@ exports.getNewsBySlug = async (req, res) => {
 exports.getNewsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
+    // ⚡ Bolt Optimization: Exclude heavy 'content' column in category news list query
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('id, title, slug, description, image_url, category, author, published, created_at, updated_at')
       .ilike('category', category)
       .eq('published', true)
       .order('created_at', { ascending: false });
@@ -81,10 +84,13 @@ exports.searchNews = async (req, res) => {
   try {
     const { q } = req.query;
 
+    // ⚡ Bolt Optimization: Exclude heavy 'content' column in news search list query
+    const listFields = 'id, title, slug, description, image_url, category, author, published, created_at, updated_at';
+
     if (!q || q.trim() === '') {
       const { data, error } = await supabase
         .from('news')
-        .select('*')
+        .select(listFields)
         .eq('published', true)
         .order('created_at', { ascending: false });
 
@@ -95,7 +101,7 @@ exports.searchNews = async (req, res) => {
     const searchTerm = `%${q.trim()}%`;
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(listFields)
       .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
       .eq('published', true)
       .order('created_at', { ascending: false });
