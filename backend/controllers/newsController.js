@@ -18,9 +18,11 @@ exports.getHealth = (req, res) => {
 // GET /api/news
 exports.getAllNews = async (req, res) => {
   try {
+    // Optimization: Select only required fields for list cards to minimize database payload size
+    // and network transfer overhead (omits heavy article content).
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('id, title, slug, description, image_url, category, created_at')
       .eq('published', true)
       .order('created_at', { ascending: false });
 
@@ -59,9 +61,10 @@ exports.getNewsBySlug = async (req, res) => {
 exports.getNewsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
+    // Optimization: Select only required fields for list cards to minimize payload size
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('id, title, slug, description, image_url, category, created_at')
       .ilike('category', category)
       .eq('published', true)
       .order('created_at', { ascending: false });
@@ -82,9 +85,10 @@ exports.searchNews = async (req, res) => {
     const { q } = req.query;
 
     if (!q || q.trim() === '') {
+      // Optimization: Select only required fields for list cards to minimize payload size
       const { data, error } = await supabase
         .from('news')
-        .select('*')
+        .select('id, title, slug, description, image_url, category, created_at')
         .eq('published', true)
         .order('created_at', { ascending: false });
 
@@ -93,9 +97,10 @@ exports.searchNews = async (req, res) => {
     }
 
     const searchTerm = `%${q.trim()}%`;
+    // Optimization: Select only required fields for list cards to minimize payload size
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select('id, title, slug, description, image_url, category, created_at')
       .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
       .eq('published', true)
       .order('created_at', { ascending: false });
