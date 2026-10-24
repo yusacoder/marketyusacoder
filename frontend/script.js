@@ -33,14 +33,17 @@ async function renderCategoriesNav(activeCategory = null) {
 }
 
 // Function to render news list
-function createNewsCard(item) {
+// Performance optimization: Prioritize the first image (LCP asset) above the fold with fetchpriority="high" and eager loading, while lazy loading remaining images.
+function createNewsCard(item, index = 0) {
   const formattedDate = formatDate(item.created_at);
   const imageUrl = item.image_url || 'https://via.placeholder.com/600x400?text=Haber+Fotografi';
+  const loadingAttr = index === 0 ? 'eager' : 'lazy';
+  const fetchPriorityAttr = index === 0 ? 'high' : 'auto';
 
   return `
     <a href="haber.html?slug=${encodeURIComponent(item.slug)}" class="card">
       <div class="card-image-wrapper">
-        <img src="${imageUrl}" alt="${item.title}" class="card-image" loading="lazy" onerror="this.src='https://via.placeholder.com/600x400?text=Haber+Fotografi'">
+        <img src="${imageUrl}" alt="${item.title}" class="card-image" loading="${loadingAttr}" fetchpriority="${fetchPriorityAttr}" onerror="this.src='https://via.placeholder.com/600x400?text=Haber+Fotografi'">
       </div>
       <div class="card-body">
         <div class="card-meta">
@@ -102,7 +105,7 @@ async function loadHomePage() {
       return;
     }
 
-    container.innerHTML = news.map(item => createNewsCard(item)).join("");
+    container.innerHTML = news.map((item, index) => createNewsCard(item, index)).join("");
   } catch (err) {
     console.error(err);
     container.innerHTML = `<div class="no-results">Haberler yüklenirken bir hata oluştu: ${err.message}</div>`;
@@ -136,7 +139,7 @@ async function loadCategoryPage() {
       return;
     }
 
-    container.innerHTML = news.map(item => createNewsCard(item)).join("");
+    container.innerHTML = news.map((item, index) => createNewsCard(item, index)).join("");
   } catch (err) {
     console.error(err);
     container.innerHTML = `<div class="no-results">Haberler yüklenirken bir hata oluştu: ${err.message}</div>`;
@@ -175,7 +178,8 @@ async function loadNewsDetailPage() {
           <span><strong>Tarih:</strong> ${formattedDate}</span>
         </div>
       </div>
-      <img src="${imageUrl}" alt="${item.title}" class="detail-image" onerror="this.src='https://via.placeholder.com/800x450?text=Haber+Fotografi'">
+      <!-- Performance optimization: fetchpriority="high" and default eager loading for primary article media improves LCP on detail view -->
+      <img src="${imageUrl}" alt="${item.title}" class="detail-image" fetchpriority="high" onerror="this.src='https://via.placeholder.com/800x450?text=Haber+Fotografi'">
       <div class="detail-description">${item.description || ''}</div>
       <div class="detail-content">${item.content || ''}</div>
     `;
