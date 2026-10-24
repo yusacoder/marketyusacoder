@@ -1,0 +1,3 @@
+## 2026-10-24 - Priority Asset Hints for Above-The-Fold Images (LCP Optimization)
+**Learning:** Defaulting all dynamically rendered list images to `loading="lazy"` negatively impacts Largest Contentful Paint (LCP) because browsers defer requesting LCP visual elements until post-layout calculations. Setting `fetchpriority="high"` and `loading="eager"` specifically on the hero image (index 0) speeds up resource discovery and LCP rendering while retaining `loading="lazy"` for below-the-fold assets.
+**Action:** Always check dynamically generated card/grid layouts for `loading="lazy"` applied indiscriminately across all elements, and ensure the primary hero/index-0 image uses eager loading and high fetch priority.
