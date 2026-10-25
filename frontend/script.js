@@ -11,15 +11,33 @@ function formatDate(dateString) {
   });
 }
 
-// Function to render categories navigation
+// Function to render categories navigation with sessionStorage caching
 async function renderCategoriesNav(activeCategory = null) {
   const container = document.getElementById("categoriesNav");
   if (!container) return;
 
   try {
-    const res = await fetch(`${API_URL}/api/categories`);
-    if (!res.ok) throw new Error("Kategoriler alınamadı.");
-    const categories = await res.json();
+    let categories;
+    // Bolt Optimization: Check client-side sessionStorage cache to prevent redundant HTTP requests on every navigation
+    const cachedCategories = sessionStorage.getItem("categories_cache");
+    if (cachedCategories) {
+      try {
+        categories = JSON.parse(cachedCategories);
+      } catch (e) {
+        categories = null;
+      }
+    }
+
+    if (!categories) {
+      const res = await fetch(`${API_URL}/api/categories`);
+      if (!res.ok) throw new Error("Kategoriler alınamadı.");
+      categories = await res.json();
+      try {
+        sessionStorage.setItem("categories_cache", JSON.stringify(categories));
+      } catch (e) {
+        // Handle storage quota or restricted environment
+      }
+    }
 
     let html = `<li><a href="index.html" class="nav-link ${!activeCategory ? 'active' : ''}">Tümü</a></li>`;
     categories.forEach(cat => {
