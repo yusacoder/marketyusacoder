@@ -1,0 +1,3 @@
+## 2026-10-26 - Selective Column Fetching for News Listing API Endpoints
+**Learning:** Returning full table columns (`select('*')`) in list endpoints includes heavy HTML/text `content` body fields, significantly inflating JSON response sizes over network and incurring extra PostgreSQL memory footprint per request.
+**Action:** Always project only required fields (`id, title, slug, description, image_url, category, author, created_at, published`) on list endpoints (`/api/news`, `/api/news/category/:category`, `/api/news/search`), leaving heavy `content` retrieval exclusively to single-resource endpoints (`/api/news/:slug`).
