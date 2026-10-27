@@ -112,5 +112,7 @@ exports.searchNews = async (req, res) => {
 
 // GET /api/categories
 exports.getCategories = (req, res) => {
+  // Cache response for 1 hour (3600s) on client/CDN since static categories rarely change
+  res.setHeader('Cache-Control', 'public, max-age=3600');
   res.status(200).json(CATEGORIES);
 };
