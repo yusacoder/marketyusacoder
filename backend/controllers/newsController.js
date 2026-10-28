@@ -110,7 +110,26 @@ exports.searchNews = async (req, res) => {
   }
 };
 
+// In-memory cache for categories with 5-minute TTL
+// Performance impact: Reduces CPU overhead and response latency on high-frequency navigation requests,
+// and sets Cache-Control HTTP header to enable browser/CDN edge caching.
+let categoriesCache = {
+  data: CATEGORIES,
+  expiry: 0
+};
+const CATEGORIES_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 // GET /api/categories
 exports.getCategories = (req, res) => {
-  res.status(200).json(CATEGORIES);
+  const now = Date.now();
+  if (!categoriesCache.data || now > categoriesCache.expiry) {
+    categoriesCache = {
+      data: CATEGORIES,
+      expiry: now + CATEGORIES_CACHE_TTL_MS
+    };
+  }
+
+  // Enable HTTP caching for client browsers and CDN edge nodes for 5 minutes
+  res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
+  res.status(200).json(categoriesCache.data);
 };
