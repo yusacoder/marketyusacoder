@@ -1,0 +1,3 @@
+## 2026-10-31 - Exclude heavy article body from news listing queries
+**Learning:** Full article bodies (`content` text column) in this architecture were eagerly retrieved on all list and search queries via `select('*')`, even though the frontend cards (`createNewsCard`) only render headline metadata (`title`, `slug`, `description`, `image_url`, `category`, `created_at`). In queries returning multiple items, including `content` wastes database I/O, Supabase egress bandwidth, backend memory serialization, and browser download time.
+**Action:** Always project only the specific display fields required for card lists (`NEWS_LIST_FIELDS`) and reserve `content` retrieval strictly for the detail endpoint (`getNewsBySlug`).
