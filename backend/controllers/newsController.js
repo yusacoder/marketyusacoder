@@ -10,6 +10,12 @@ const CATEGORIES = [
   "Anime"
 ];
 
+// Performance optimization: Exclude the heavy 'content' column from list queries.
+// Frontend cards only need title, slug, description, image_url, category, author, and date.
+// Omitting full article body text significantly reduces database memory usage, network payload size,
+// JSON serialization overhead, and network transfer time when fetching lists of news items.
+const NEWS_LIST_FIELDS = 'id, title, slug, description, image_url, category, author, published, created_at, updated_at';
+
 // GET /api/health
 exports.getHealth = (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
@@ -20,7 +26,7 @@ exports.getAllNews = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .eq('published', true)
       .order('created_at', { ascending: false });
 
@@ -61,7 +67,7 @@ exports.getNewsByCategory = async (req, res) => {
     const { category } = req.params;
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .ilike('category', category)
       .eq('published', true)
       .order('created_at', { ascending: false });
@@ -84,7 +90,7 @@ exports.searchNews = async (req, res) => {
     if (!q || q.trim() === '') {
       const { data, error } = await supabase
         .from('news')
-        .select('*')
+        .select(NEWS_LIST_FIELDS)
         .eq('published', true)
         .order('created_at', { ascending: false });
 
@@ -95,7 +101,7 @@ exports.searchNews = async (req, res) => {
     const searchTerm = `%${q.trim()}%`;
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
       .eq('published', true)
       .order('created_at', { ascending: false });
