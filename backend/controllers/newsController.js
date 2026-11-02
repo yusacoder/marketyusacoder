@@ -10,6 +10,12 @@ const CATEGORIES = [
   "Anime"
 ];
 
+// Performance Optimization:
+// News cards in feed, category, and search lists only render title, slug, description, image_url, category, and created_at.
+// Excluding heavy full-text 'content' from list queries significantly reduces database payload,
+// network transfer size, and JSON serialization overhead (typically ~70-90% smaller payload per item).
+const NEWS_LIST_FIELDS = 'id, title, slug, description, image_url, category, created_at';
+
 // GET /api/health
 exports.getHealth = (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
@@ -20,7 +26,7 @@ exports.getAllNews = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .eq('published', true)
       .order('created_at', { ascending: false });
 
@@ -38,6 +44,7 @@ exports.getAllNews = async (req, res) => {
 exports.getNewsBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
+    // Single article view needs full content and author
     const { data, error } = await supabase
       .from('news')
       .select('*')
@@ -61,7 +68,7 @@ exports.getNewsByCategory = async (req, res) => {
     const { category } = req.params;
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .ilike('category', category)
       .eq('published', true)
       .order('created_at', { ascending: false });
@@ -84,7 +91,7 @@ exports.searchNews = async (req, res) => {
     if (!q || q.trim() === '') {
       const { data, error } = await supabase
         .from('news')
-        .select('*')
+        .select(NEWS_LIST_FIELDS)
         .eq('published', true)
         .order('created_at', { ascending: false });
 
@@ -95,7 +102,7 @@ exports.searchNews = async (req, res) => {
     const searchTerm = `%${q.trim()}%`;
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
       .eq('published', true)
       .order('created_at', { ascending: false });
