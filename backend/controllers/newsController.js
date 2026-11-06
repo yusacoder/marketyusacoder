@@ -10,6 +10,11 @@ const CATEGORIES = [
   "Anime"
 ];
 
+// Performance optimization: Only select fields needed for card rendering in list/search views.
+// Excludes heavy `content` text column, significantly reducing database I/O, network payload size,
+// and JSON serialization overhead for multiple items. Full content is fetched only in `getNewsBySlug`.
+const NEWS_CARD_FIELDS = 'id, title, slug, description, image_url, category, created_at';
+
 // GET /api/health
 exports.getHealth = (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
@@ -20,7 +25,7 @@ exports.getAllNews = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_CARD_FIELDS)
       .eq('published', true)
       .order('created_at', { ascending: false });
 
@@ -61,7 +66,7 @@ exports.getNewsByCategory = async (req, res) => {
     const { category } = req.params;
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_CARD_FIELDS)
       .ilike('category', category)
       .eq('published', true)
       .order('created_at', { ascending: false });
@@ -84,7 +89,7 @@ exports.searchNews = async (req, res) => {
     if (!q || q.trim() === '') {
       const { data, error } = await supabase
         .from('news')
-        .select('*')
+        .select(NEWS_CARD_FIELDS)
         .eq('published', true)
         .order('created_at', { ascending: false });
 
@@ -95,7 +100,7 @@ exports.searchNews = async (req, res) => {
     const searchTerm = `%${q.trim()}%`;
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_CARD_FIELDS)
       .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
       .eq('published', true)
       .order('created_at', { ascending: false });
