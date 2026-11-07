@@ -1,0 +1,3 @@
+## 2026-11-07 - Selective Column Projection in News Feed Queries
+**Learning:** In full-stack applications with rich content models like article or blog platforms, storing large multi-kilobyte text fields (`content`) in the main table leads to massive payload bloat when querying list/search endpoints with `.select('*')`. List views only need card metadata (`id, title, slug, description, image_url, category, author, created_at`).
+**Action:** When querying Supabase or relational tables for collection/feed views, always project explicit card metadata columns (`NEWS_LIST_FIELDS`) rather than `.select('*')`, reserving full body text queries strictly for detail endpoints.
