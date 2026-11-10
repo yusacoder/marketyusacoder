@@ -15,12 +15,18 @@ exports.getHealth = (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 };
 
+// Fields required for news cards and list views (excludes full `content` text)
+// Performance optimization: reduces database egress, network latency, and memory footprint
+const NEWS_LIST_FIELDS = 'id, title, slug, description, image_url, category, author, created_at';
+
 // GET /api/news
 exports.getAllNews = async (req, res) => {
   try {
+    // ⚡ Bolt optimization: project only card fields instead of select('*')
+    // Full article content is only loaded when visiting the detail page (/api/news/:slug)
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .eq('published', true)
       .order('created_at', { ascending: false });
 
@@ -59,9 +65,10 @@ exports.getNewsBySlug = async (req, res) => {
 exports.getNewsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
+    // ⚡ Bolt optimization: project only card fields instead of select('*')
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .ilike('category', category)
       .eq('published', true)
       .order('created_at', { ascending: false });
@@ -82,9 +89,10 @@ exports.searchNews = async (req, res) => {
     const { q } = req.query;
 
     if (!q || q.trim() === '') {
+      // ⚡ Bolt optimization: project only card fields instead of select('*')
       const { data, error } = await supabase
         .from('news')
-        .select('*')
+        .select(NEWS_LIST_FIELDS)
         .eq('published', true)
         .order('created_at', { ascending: false });
 
@@ -93,9 +101,10 @@ exports.searchNews = async (req, res) => {
     }
 
     const searchTerm = `%${q.trim()}%`;
+    // ⚡ Bolt optimization: project only card fields instead of select('*')
     const { data, error } = await supabase
       .from('news')
-      .select('*')
+      .select(NEWS_LIST_FIELDS)
       .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
       .eq('published', true)
       .order('created_at', { ascending: false });
